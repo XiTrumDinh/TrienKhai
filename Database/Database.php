@@ -6,7 +6,7 @@ class Database
     private $pass = "";
     private $dbname = "kipeeda";
 
-    private $conn;
+    public $conn;
 
     public function __construct()
     {
@@ -124,5 +124,9 @@ class Database
     public function close()
     {
         $this->conn->close();
+    }
+    public function getConnection()
+    {
+        return $this->conn;
     }
 }

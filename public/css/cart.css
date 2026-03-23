@@ -388,3 +388,8 @@
         padding: 12px;
     }
 }
+.price_old {
+    text-decoration: line-through;
+    color: #888;
+    font-size: 13px;
+}

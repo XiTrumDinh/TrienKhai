@@ -71,6 +71,7 @@ LIMIT 4"
         <div class="home-banner">
 
             <!-- MENU -->
+             <div id="overlay"></div>
             <div class="menu" id="bannerMenu">
                 <ul>
 
@@ -78,7 +79,7 @@ LIMIT 4"
 
                         <li class="<?= ($category == $c['id']) ? 'active' : '' ?>">
 
-                            <a href="index.php?category=<?= $c['id'] ?>">
+                            <a href="view.php?category=<?= $c['id'] ?>">
 
                                 <?= $c['name'] ?>
 
@@ -159,7 +160,7 @@ LIMIT 4"
                         $percent = round((($f['old_price'] - $f['price']) / $f['old_price']) * 100);
                         ?>
 
-                        <span class="sale">-<?= $percent ?>%</span>
+                        <span class="sale"><?= $percent ?>%</span>
 
                     </div>
 
@@ -191,7 +192,7 @@ LIMIT 4"
 
 
     </section>
-
+<br>
 
     <!-- Banner Khueyen mai -->
     <section class="container">
@@ -206,71 +207,72 @@ LIMIT 4"
             </div>
 
         </div>
-        </section>
+    </section>
 
 
-        <!-- Sản phẩm -->
+    <!-- Sản phẩm -->
 
-        <section class="product-list container">
-            <?php foreach ($products as $p): ?>
+    <section class="product-list container">
+        <?php foreach ($products as $p): ?>
 
-                <a href="descript.php?id=<?= $p['id'] ?>" class="product-link">
+            <a href="descript.php?id=<?= $p['id'] ?>" class="product-link">
 
-                    <div class="product-item">
+                <div class="product-item">
 
-                        <img src="public/img/<?= $p['image'] ?>">
+                    <img src="public/img/<?= $p['image'] ?>">
 
-                        <h4><?= $p['name'] ?></h4>
+                    <h4><?= $p['name'] ?></h4>
 
-                        <div class="spec">
-                            <?= $p['short_description'] ?>
-                        </div>
+                    <div class="spec">
+                        <?= $p['short_description'] ?>
+                    </div>
 
-                        <div class="old">
-                            <?= number_format($p['old_price'], 0, ',', '.') ?> ₫
-                        </div>
+                    <div class="old">
+                        <?= number_format($p['old_price'], 0, ',', '.') ?> ₫
+                    </div>
 
-                        <div class="price-row">
+                    <div class="price-row">
 
-                            <span class="new">
-                                <?= number_format($p['price'], 0, ',', '.') ?> ₫
-                            </span>
+                        <span class="new">
+                            <?= number_format($p['price'], 0, ',', '.') ?> ₫
+                        </span>
 
-                            <?php
-                            $percent = round((($p['old_price'] - $p['price']) / $p['old_price']) * 100);
-                            ?>
+                        <?php
+                        $percent = round((($p['old_price'] - $p['price']) / $p['old_price']) * 100);
+                        ?>
 
-                            <span class="sale">-<?= $percent ?>%</span>
-
-                        </div>
-
-                        <div class="rating">
-                            ⭐ 0.0 (0 đánh giá)
-                        </div>
+                        <span class="sale">-<?= $percent ?>%</span>
 
                     </div>
 
-                </a>
+                    <div class="rating">
+                        ⭐ 0.0 (0 đánh giá)
+                    </div>
 
-            <?php endforeach ?>
+                </div>
 
-
-        </section>
-
-
-        <!-- Phân trang -->
-        <div class="text-center mt-4 mb-4">
-            <a href="view.php"
-                class="btn btn-danger px-4 py-2">
-                Xem thêm
             </a>
-        </div>
-        <!-- Footer -->
-        <?php include "footer.php" ?>
+
+        <?php endforeach ?>
 
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="public/js/footer.js"></script>
+    </section>
+
+
+    <!-- Phân trang -->
+    <div class="text-center mt-4 mb-4">
+        <a href="view.php"
+            class="btn btn-danger px-4 py-2">
+            Xem thêm
+        </a>
+    </div>
+    <!-- Footer -->
+    <?php include "footer.php" ?>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="public\js\footer.js"></script>
+    <script src="public\js\index.js"></script>
 </body>
 
 </html>

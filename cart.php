@@ -1,5 +1,12 @@
 <?php
 session_start();
+include_once "Database/Database.php";
+
+$db = new Database();
+
+// Lấy danh sách sản phẩm (ví dụ)
+$sql = "SELECT * FROM products";
+$result = $db->conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -39,23 +46,69 @@ session_start();
                     <div class="label">Hoàn tất</div>
                 </div>
             </div>
+            <?php
+            $total = 0;
+            $totalQty = 0;
 
-            <!-- Item -->
-            <div class="cart-item">
-                <img src="public/img/pc1.jpg" alt="product" />
-                <div class="item-info">
-                    <h4>PC GVN Intel i5-14400F/VGA ARC B580</h4>
-                </div>
-                <div class="item-actions">
-                    <p class="price-old">23.620.000₫</p>
-                    <p class="price">22.190.000₫</p>
-                    <div class="quantity">
-                        <button class="minus">-</button>
-                        <input type="number" value="1" min="1" />
-                        <button class="plus">+</button>
-                    </div>
-                </div>
-            </div>
+            if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
+
+                $conn = $db->conn; // nếu bạn đang dùng public
+
+                foreach ($_SESSION['cart'] as $id => $qty) {
+
+                    $id = (int)$id;
+                    $qty = (int)$qty;
+
+                    $sql = "SELECT * FROM products WHERE id = $id";
+                    $result = $conn->query($sql);
+
+                    if ($result && $result->num_rows > 0) {
+                        $row = $result->fetch_assoc();
+                        $old_price = (float)$row['old_price'];
+                        $price = (float)$row['price'];
+                        $subtotal = $price * $qty;
+
+                        $total += $subtotal;
+                        $totalQty += $qty;
+            ?>
+                        <!-- Item -->
+                        <div class="cart-item">
+                            <img src="public/img/<?php echo $row['image']; ?>" />
+
+                            <div class="item-info">
+                                <h4><?php echo $row['name']; ?></h4>
+                            </div>
+
+                            <div class="item-actions">
+                                <p class="price"><?php echo number_format($price); ?>₫</p>
+                                <p class="price_old"><?php echo number_format($old_price); ?>₫</p>
+
+                                <div class="quantity d-flex align-items-center gap-2">
+
+                                    <!-- nút giảm -->
+                                    <a href="updatecart.php?id=<?php echo $id; ?>&action=minus"
+                                        class="btn btn-sm btn-outline-secondary">-</a>
+
+                                    <!-- số lượng -->
+                                    <input type="number"
+                                        value="<?php echo $qty; ?>"
+                                        min="1"
+                                        readonly
+                                        style="width:60px; text-align:center;">
+
+                                    <!-- nút tăng -->
+                                    <a href="updatecart.php?id=<?php echo $id; ?>&action=plus"
+                                        class="btn btn-sm btn-outline-secondary">+</a>
+
+                                </div>
+
+                            </div>
+                        </div>
+            <?php
+                    }
+                }
+            }
+            ?>
 
 
             <!-- Discount -->
@@ -70,8 +123,15 @@ session_start();
             <!-- Summary -->
             <div class="summary-box">
                 <div class="summary-row">
+                    <span class="label">Tổng sản phẩm</span>
+                    <span class="value"><?php echo $totalQty; ?></span>
+                </div>
+
+                <div class="summary-row">
                     <span class="label">Tổng tiền</span>
-                    <span class="value">240.000đ</span>
+                    <span class="value">
+                        <?php echo number_format($total, 0, ',', '.'); ?>₫
+                    </span>
                 </div>
             </div>
 

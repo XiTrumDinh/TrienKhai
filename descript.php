@@ -98,9 +98,10 @@ $similar = $db->select(
 
                 <div class="d-flex gap-3 mt-3">
 
-                    <button class="btn btn-danger px-4 py-2 fw-bold">
+                    <a href="controller/addtocart.php?id=<?= $p['id'] ?>"
+                        class="btn btn-danger px-4 py-2 fw-bold">
                         MUA NGAY
-                    </button>
+                    </a>
 
                     <button class="btn btn-outline-danger px-4 py-2">
                         TƯ VẤN NGAY

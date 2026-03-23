@@ -1,3 +1,8 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 <link rel="stylesheet" href="public/css/navbar.css">
 
 <nav class="navbar navbar-expand-lg navbar-light bg-danger">
@@ -46,7 +51,19 @@
                 <div class="d-flex flex-column flex-lg-row gap-2">
                     <button class="btn btn-light">Tra cứu đơn hàng</button>
                     <a href="cart.php" class="btn btn-light">Giỏ hàng</a>
-                    <button class="btn btn-light">Đăng nhập</button>
+                    <?php if (isset($_SESSION["user"])): ?>
+
+                        <span class="btn btn-light">
+                            <?= $_SESSION["user"] ?>
+                        </span>
+
+                        <a href="logout.php" class="btn btn-warning">Logout</a>
+
+                    <?php else: ?>
+
+                        <a href="login.php" class="btn btn-light">Đăng nhập</a>
+
+                    <?php endif; ?>
                 </div>
 
             </div>

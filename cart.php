@@ -86,7 +86,7 @@ $result = $db->conn->query($sql);
                                 <div class="quantity d-flex align-items-center gap-2">
 
                                     <!-- nút giảm -->
-                                    <a href="updatecart.php?id=<?php echo $id; ?>&action=minus"
+                                    <a href="Controller/updatecart.php?id=<?php echo $id; ?>&action=minus"
                                         class="btn btn-sm btn-outline-secondary">-</a>
 
                                     <!-- số lượng -->
@@ -97,7 +97,7 @@ $result = $db->conn->query($sql);
                                         style="width:60px; text-align:center;">
 
                                     <!-- nút tăng -->
-                                    <a href="updatecart.php?id=<?php echo $id; ?>&action=plus"
+                                    <a href="Controller/updatecart.php?id=<?php echo $id; ?>&action=plus"
                                         class="btn btn-sm btn-outline-secondary">+</a>
 
                                 </div>

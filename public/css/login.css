@@ -1,64 +1,67 @@
-body {
-    background: #f8f9fa;
+/* ===== LOGIN FORM ===== */
+
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 60px 0;
+    margin-bottom: 130px;
 }
 
-/* Card login */
-.login-box {
-    max-width: 420px;
-    margin: 80px auto;
-    padding: 30px;
-
+.login-card {
+    width: 100%;
+    max-width: 380px;
     background: #fff;
+    padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+
+    border-top: 4px solid #e35d5b;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
-/* Title */
-.login-box h3 {
+.login-card h3 {
+    text-align: center;
+    margin-bottom: 20px;
     font-weight: 600;
 }
 
-/* Input */
-.login-box input {
-    height: 45px;
+/* input */
+.login-card .form-control {
     border-radius: 8px;
     border: 1px solid #ddd;
+    padding: 10px;
 }
 
-.login-box input:focus {
-    border-color: #0d6efd;
-    box-shadow: none;
+.login-card .form-control:focus {
+    border-color: #e35d5b;
+    box-shadow: 0 0 0 2px rgba(227, 93, 91, 0.2);
 }
 
-/* Link */
-.login-box a {
-    text-decoration: none;
+/* button */
+.login-btn {
+    background: #e35d5b;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 10px;
+    transition: 0.2s;
+}
+
+.login-btn:hover {
+    background: #cc4c4a;
+}
+
+/* link */
+.login-card a {
+    color: #e35d5b;
     font-size: 14px;
 }
 
-.login-box a:hover {
+.login-card a:hover {
     text-decoration: underline;
 }
 
-/* Checkbox */
+/* checkbox */
 .form-check-label {
     font-size: 14px;
-}
-
-/* Button */
-.login-box button {
-    height: 45px;
-    border-radius: 8px;
-    font-weight: 500;
-}
-
-/* Hover button */
-.login-box button:hover {
-    opacity: 0.9;
-}
-
-/* Error */
-.alert {
-    font-size: 14px;
-    border-radius: 8px;
 }

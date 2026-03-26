@@ -1,35 +1,44 @@
-/* ===== LOGIN FORM ===== */
+/* ===== LOGIN / REGISTER FORM ===== */
 
 .login-wrapper {
     display: flex;
     justify-content: center;
-    padding: 60px 0;
-    margin-bottom: 130px;
+    align-items: center;
+    padding: 60px 15px; /* thêm padding ngang cho mobile */
+    min-height: 80vh;
 }
 
 .login-card {
     width: 100%;
-    max-width: 380px;
+    max-width: 400px;
     background: #fff;
-    padding: 30px;
-    border-radius: 12px;
+    padding: 30px 25px;
+    border-radius: 14px;
 
     border-top: 4px solid #e35d5b;
 
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    transition: 0.3s;
 }
 
+/* hover nhẹ cho desktop */
+.login-card:hover {
+    transform: translateY(-2px);
+}
+
+/* title */
 .login-card h3 {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     font-weight: 600;
 }
 
 /* input */
 .login-card .form-control {
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid #ddd;
-    padding: 10px;
+    padding: 12px;
+    font-size: 14px;
 }
 
 .login-card .form-control:focus {
@@ -37,13 +46,19 @@
     box-shadow: 0 0 0 2px rgba(227, 93, 91, 0.2);
 }
 
-/* button */
+/* email + button */
+.login-card .d-flex button {
+    white-space: nowrap;
+    border-radius: 10px;
+}
+
+/* button chính */
 .login-btn {
     background: #e35d5b;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 500;
-    padding: 10px;
+    padding: 12px;
     transition: 0.2s;
 }
 
@@ -64,4 +79,50 @@
 /* checkbox */
 .form-check-label {
     font-size: 14px;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* tablet */
+@media (max-width: 768px) {
+    .login-card {
+        padding: 25px 20px;
+    }
+}
+
+/* mobile */
+@media (max-width: 480px) {
+
+    .login-wrapper {
+        padding: 40px 10px;
+    }
+
+    .login-card {
+        padding: 20px 15px;
+        border-radius: 10px;
+    }
+
+    .login-card h3 {
+        font-size: 20px;
+    }
+
+    .login-card .form-control {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    .login-btn {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    /* email + nút gửi mã xuống dòng */
+    .login-card .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .login-card .d-flex button {
+        width: 100%;
+    }
 }

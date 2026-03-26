@@ -1,0 +1,139 @@
+.sidebar {
+    background: #f1f1f1;
+    min-height: 80vh;
+    padding: 15px;
+    border-right: 1px solid #ccc;
+}
+
+.sidebar ul li {
+    padding: 8px 0;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: black;
+}
+
+.main-content {
+    background: #eee;
+    min-height: 80vh;
+    padding: 20px;
+}
+
+.table tbody .fake-row {
+    height: 60px;
+    background: #f5a3a3;
+    /* màu đỏ giống hình */
+}
+
+.sidebar h6 {
+    padding: 8px 10px;
+}
+
+.sidebar h6,
+.main-content h5 {
+    font-size: 18px;
+    padding: 8px 12px;
+    border-bottom: 2px solid #eee;
+}
+
+.action-btn {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+    border: none;
+    margin: 2px 0;
+}
+
+.btn-edit {
+    background: #ffc107;
+    color: #000;
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: #fff;
+}
+
+.action-btn:hover {
+    opacity: 0.85;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 30px 0;
+}
+
+.pagination a {
+    padding: 8px 14px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+}
+
+.pagination a.active {
+    background: red;
+    color: white;
+}
+
+th {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+th:hover {
+    color: #e35d5b;
+}
+
+.sidebar a {
+    display: block;
+    padding: 8px 10px;
+    color: #333;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+/* hover */
+.sidebar a:hover {
+    background: #f5f5f5;
+}
+
+/* ACTIVE (đang chọn) */
+.sidebar a.active {
+    background: #e35d5b;
+    color: #fff;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .switch {
+        width: 30px;
+        height: 16px;
+    }
+
+    .slider:before {
+        width: 12px;
+        height: 12px;
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(14px);
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+        border-right: none;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .main-content {
+        padding: 10px;
+    }
+}

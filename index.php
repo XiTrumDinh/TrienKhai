@@ -259,7 +259,7 @@ LIMIT 4"
     </section>
 
 
-    <!-- Phân trang -->
+    
     <div class="text-center mt-4 mb-4">
         <a href="view.php"
             class="btn btn-danger px-4 py-2">

@@ -125,16 +125,17 @@ LIMIT 4"
     <!-- Phân trang -->
     <div class="pagination">
 
+        <!-- Prev -->
         <a href="?category=<?= $category ?>&page=<?= max(1, $page - 1) ?>">«</a>
 
+        <!-- Number -->
         <?php for ($i = 1; $i <= $totalPage; $i++) { ?>
-
-            <a href="?category=<?= $category ?>&page=<?= $i ?>">
+            <a class="<?= ($i == $page) ? 'active' : '' ?>" href="?category=<?= $category ?>&page=<?= $i ?>">
                 <?= $i ?>
             </a>
-
         <?php } ?>
 
+        <!-- Next -->
         <a href="?category=<?= $category ?>&page=<?= min($totalPage, $page + 1) ?>">»</a>
 
     </div>

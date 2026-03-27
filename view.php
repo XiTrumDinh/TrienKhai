@@ -1,52 +1,51 @@
 <?php
 require_once "Database/Database.php";
 $category = $_GET['category'] ?? null;
+$keyword = $_GET['keyword'] ?? "";
 $page = $_GET['page'] ?? 1;
+
 $db = new Database();
 
 $limit = 10;
-
-$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-$currentPage = $page;
+$page = (int)$page;
 $offset = ($page - 1) * $limit;
-/* Lấy danh mục mới nhất */
-$categories = $db->select("SELECT * FROM categories");
-/* Lấy sản phẩm mới nhất */
+
+/* BUILD QUERY */
+$sql = "SELECT * FROM products WHERE flash_sale = 0";
+$sqlCount = "SELECT COUNT(*) FROM products WHERE flash_sale = 0";
+
+$params = [];
+$types = "";
+
+/* filter category */
 if ($category) {
-
-    $products = $db->select(
-        "SELECT * FROM products
-WHERE category_id = ?
-AND flash_sale = 0
-ORDER BY created_at DESC
-LIMIT $offset, $limit",
-        "i",
-        [$category]
-    );
-} else {
-
-    $products = $db->select(
-        "SELECT * FROM products
-WHERE flash_sale = 0
-ORDER BY created_at DESC
-LIMIT $offset, $limit"
-    );
+    $sql .= " AND category_id = ?";
+    $sqlCount .= " AND category_id = ?";
+    $params[] = $category;
+    $types .= "i";
 }
 
-/* tổng sản phẩm */
-if ($category) {
-    $total = $db->count("SELECT COUNT(*) FROM products WHERE category_id=$category AND flash_sale=0");
-} else {
-    $total = $db->count("SELECT COUNT(*) FROM products WHERE flash_sale=0");
+/* filter keyword */
+if ($keyword) {
+    $sql .= " AND name LIKE ?";
+    $sqlCount .= " AND name LIKE ?";
+    $params[] = "%$keyword%";
+    $types .= "s";
 }
 
-/* tổng trang */
+/* order + limit */
+$sql .= " ORDER BY created_at DESC LIMIT $offset, $limit";
+
+/* query */
+$products = $db->select($sql, $types, $params);
+
+/* total */
+$total = $db->count($sqlCount, $types, $params);
+
+/* total page */
 $totalPage = ceil($total / $limit);
-$flash = $db->select(
-    "SELECT * FROM products 
-WHERE flash_sale = 1 
-LIMIT 4"
-);
+/*Doi anh */
+$banner = $db->select("SELECT image FROM categories LIMIT 1")[0]['image'];
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -126,17 +125,18 @@ LIMIT 4"
     <div class="pagination">
 
         <!-- Prev -->
-        <a href="?category=<?= $category ?>&page=<?= max(1, $page - 1) ?>">«</a>
+        <a href="?category=<?= $category ?>&keyword=<?= $keyword ?>&page=<?= max(1, $page - 1) ?>">«</a>
 
         <!-- Number -->
         <?php for ($i = 1; $i <= $totalPage; $i++) { ?>
-            <a class="<?= ($i == $page) ? 'active' : '' ?>" href="?category=<?= $category ?>&page=<?= $i ?>">
+            <a class="<?= ($i == $page) ? 'active' : '' ?>"
+                href="?category=<?= $category ?>&keyword=<?= $keyword ?>&page=<?= $i ?>">
                 <?= $i ?>
             </a>
         <?php } ?>
 
         <!-- Next -->
-        <a href="?category=<?= $category ?>&page=<?= min($totalPage, $page + 1) ?>">»</a>
+        <a href="?category=<?= $category ?>&keyword=<?= $keyword ?>&page=<?= min($totalPage, $page + 1) ?>">»</a>
 
     </div>
     <div id="overlay"></div>

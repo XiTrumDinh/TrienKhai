@@ -47,6 +47,8 @@ $flash = $db->select(
 WHERE flash_sale = 1 
 LIMIT 4"
 );
+/*doi anh */
+$banners = $db->select("SELECT image FROM categories");
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -71,7 +73,7 @@ LIMIT 4"
         <div class="home-banner">
 
             <!-- MENU -->
-             <div id="overlay"></div>
+            <div id="overlay"></div>
             <div class="menu" id="bannerMenu">
                 <ul>
 
@@ -94,29 +96,29 @@ LIMIT 4"
 
             <!-- BANNER LỚN -->
             <div class="banner big">
-                <img src="public/img/big_banner1.jpg">
+                <img src="<?= $banners[0]['image'] ?>">
             </div>
 
             <!-- BANNER PHẢI -->
             <div class="banner right1">
-                <img src="public/img/big_banner2.jpg">
+                <img src="<?= $banners[1]['image'] ?>">
             </div>
 
             <div class="banner right2">
-                <img src="public/img/big_banner3.jpg">
+                <img src="<?= $banners[2]['image'] ?>">
             </div>
 
             <!-- BANNER DƯỚI -->
             <div class="banner bottom1">
-                <img src="public/img/big_banner4.jpg">
+                <img src="<?= $banners[3]['image'] ?>">
             </div>
 
             <div class="banner bottom2">
-                <img src="public/img/big_banner5.jpg">
+                <img src="<?= $banners[4]['image'] ?>">
             </div>
 
             <div class="banner bottom3">
-                <img src="public/img/big_banner6.jpg">
+                <img src="<?= $banners[5]['image'] ?>">
             </div>
 
         </div>
@@ -133,9 +135,7 @@ LIMIT 4"
                 <h3><b>⚡ Siêu sale giữa tháng - Chốt deal hời ⚡</b></h3>
             </div>
             <!-- banner trái -->
-            <div class="flash-left">
-                <img src="public/img/flash_sale1.jpg">
-            </div>
+            <img src="<?= $banners[10]['image'] ?>">
 
             <!-- sản phẩm -->
             <?php foreach ($flash as $f): ?>
@@ -192,18 +192,19 @@ LIMIT 4"
 
 
     </section>
-<br>
+    <br>
 
     <!-- Banner Khueyen mai -->
     <section class="container">
         <div class="promo-wrapper">
 
             <div class="promo-banner">
-                <img src="public/img/banner1.jpg">
+                <img src="<?= $banners[8]['image'] ?>">
             </div>
 
+
             <div class="promo-banner">
-                <img src="public/img/banner2.jpg">
+                <img src="<?= $banners[7]['image'] ?>">
             </div>
 
         </div>
@@ -259,7 +260,7 @@ LIMIT 4"
     </section>
 
 
-    
+
     <div class="text-center mt-4 mb-4">
         <a href="view.php"
             class="btn btn-danger px-4 py-2">

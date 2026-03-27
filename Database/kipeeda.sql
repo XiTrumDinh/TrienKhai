@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th3 15, 2026 lúc 10:43 PM
--- Phiên bản máy phục vụ: 10.4.32-MariaDB
--- Phiên bản PHP: 8.2.12
+-- Máy chủ: 127.0.0.1:3306
+-- Thời gian đã tạo: Th3 27, 2026 lúc 12:01 PM
+-- Phiên bản máy phục vụ: 8.4.7
+-- Phiên bản PHP: 8.3.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Cơ sở dữ liệu: `kipeeda`
 --
-CREATE DATABASE IF NOT EXISTS `kipeeda` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `kipeeda`;
 
 -- --------------------------------------------------------
 
@@ -29,26 +27,29 @@ USE `kipeeda`;
 -- Cấu trúc bảng cho bảng `categories`
 --
 
-CREATE TABLE `categories` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `categories`;
+CREATE TABLE IF NOT EXISTS `categories` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `image` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `categories`
 --
 
-INSERT INTO `categories` (`id`, `name`) VALUES
-(1, 'Laptop'),
-(2, 'Laptop Gaming'),
-(3, 'Build PC'),
-(4, 'Màn Hình'),
-(5, 'Bàn Phím'),
-(6, 'Chuột, Lót Chuột'),
-(7, 'Ổ Cứng, Ram'),
-(8, 'Ghế, Bàn Gaming'),
-(9, 'Tai Nghe'),
-(10, 'Phụ Kiện');
+INSERT INTO `categories` (`id`, `name`, `image`) VALUES
+(1, 'Laptop', 'public\\img\\big_banner1.jpg'),
+(2, 'Laptop Gaming', 'public\\img\\big_banner2.jpg'),
+(3, 'Build PC', 'public\\img\\big_banner3.jpg'),
+(4, 'Màn Hình', 'public\\img\\big_banner4.jpg'),
+(5, 'Bàn Phím', 'public\\img\\big_banner5.jpg'),
+(6, 'Chuột, Lót Chuột', 'public\\img\\big_banner6.jpg'),
+(7, 'Ổ Cứng, Ram', 'public\\img\\banner1.jpg'),
+(8, 'Ghế, Bàn Gaming', 'public\\img\\banner2.jpg'),
+(9, 'Tai Nghe', 'public\\img\\big_banner4.jpg'),
+(10, 'Phụ Kiện', 'public\\img\\big_banner6.jpg');
 
 -- --------------------------------------------------------
 
@@ -56,19 +57,22 @@ INSERT INTO `categories` (`id`, `name`) VALUES
 -- Cấu trúc bảng cho bảng `products`
 --
 
-CREATE TABLE `products` (
-  `id` int(11) NOT NULL,
-  `name` varchar(500) NOT NULL,
+DROP TABLE IF EXISTS `products`;
+CREATE TABLE IF NOT EXISTS `products` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(500) COLLATE utf8mb4_general_ci NOT NULL,
   `price` decimal(10,0) NOT NULL,
   `old_price` decimal(10,0) DEFAULT NULL,
-  `image` varchar(255) NOT NULL,
-  `description` text NOT NULL,
-  `short_description` text NOT NULL,
-  `category_id` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `status` tinyint(4) NOT NULL,
-  `flash_sale` tinyint(4) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `image` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci NOT NULL,
+  `short_description` text COLLATE utf8mb4_general_ci NOT NULL,
+  `category_id` int NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` tinyint NOT NULL,
+  `flash_sale` tinyint DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `fk_categories_product` (`category_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `products`
@@ -122,12 +126,15 @@ INSERT INTO `products` (`id`, `name`, `price`, `old_price`, `image`, `descriptio
 -- Cấu trúc bảng cho bảng `product_specs`
 --
 
-CREATE TABLE `product_specs` (
-  `id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `spec_name` varchar(250) NOT NULL,
-  `spec_value` varchar(250) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `product_specs`;
+CREATE TABLE IF NOT EXISTS `product_specs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `product_id` int NOT NULL,
+  `spec_name` varchar(250) COLLATE utf8mb4_general_ci NOT NULL,
+  `spec_value` varchar(250) COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_specs_products` (`product_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=180 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `product_specs`
@@ -320,83 +327,27 @@ INSERT INTO `product_specs` (`id`, `product_id`, `spec_name`, `spec_value`) VALU
 -- Cấu trúc bảng cho bảng `users`
 --
 
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `username` varchar(100) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Ràng buộc đối với các bảng kết xuất
 --
 
 --
--- Chỉ mục cho bảng `categories`
---
-ALTER TABLE `categories`
-  ADD PRIMARY KEY (`id`);
-
---
--- Chỉ mục cho bảng `products`
---
-ALTER TABLE `products`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_categories_product` (`category_id`);
-
---
--- Chỉ mục cho bảng `product_specs`
---
-ALTER TABLE `product_specs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_specs_products` (`product_id`);
-
---
--- Chỉ mục cho bảng `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT cho các bảng đã đổ
---
-
---
--- AUTO_INCREMENT cho bảng `categories`
---
-ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT cho bảng `products`
---
-ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
-
---
--- AUTO_INCREMENT cho bảng `product_specs`
---
-ALTER TABLE `product_specs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=180;
-
---
--- AUTO_INCREMENT cho bảng `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- Các ràng buộc cho các bảng đã đổ
---
-
---
--- Các ràng buộc cho bảng `products`
+-- Ràng buộc cho bảng `products`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `fk_categories_product` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
 
 --
--- Các ràng buộc cho bảng `product_specs`
+-- Ràng buộc cho bảng `product_specs`
 --
 ALTER TABLE `product_specs`
   ADD CONSTRAINT `fk_specs_products` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);

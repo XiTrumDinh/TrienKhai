@@ -2,6 +2,69 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+require_once "Database/Database.php";
+$db = new Database();
+
+// Lấy danh mục
+$categories = $db->select("SELECT * FROM categories");
+
+// Lấy dữ liệu từ URL
+$keyword = isset($_GET["keyword"]) ? $_GET["keyword"] : "";
+$category_id = isset($_GET["category_id"]) ? $_GET["category_id"] : "";
+
+// Phân trang
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$perpage = 4;
+$start = ($page - 1) * $perpage;
+
+// =====================
+// BUILD QUERY ĐỘNG
+// =====================
+$sql = "SELECT * FROM products WHERE 1=1";
+$sqlCount = "SELECT COUNT(*) FROM products WHERE 1=1";
+
+$params = [];
+$types = "";
+
+$countParams = [];
+$countTypes = "";
+
+// Nếu có category
+if ($category_id != "") {
+    $sql .= " AND category_id = ?";
+    $sqlCount .= " AND category_id = ?";
+
+    $params[] = $category_id;
+    $types .= "i";
+
+    $countParams[] = $category_id;
+    $countTypes .= "i";
+}
+
+// Nếu có keyword
+if ($keyword != "") {
+    $sql .= " AND name LIKE ?";
+    $sqlCount .= " AND name LIKE ?";
+
+    $params[] = "%$keyword%";
+    $types .= "s";
+
+    $countParams[] = "%$keyword%";
+    $countTypes .= "s";
+}
+
+// Thêm limit
+$sql .= " LIMIT ?,?";
+$params[] = $start;
+$params[] = $perpage;
+$types .= "ii";
+
+// =====================
+// CHẠY QUERY
+// =====================
+$products = $db->select($sql, $types, $params);
+$total = $db->count($sqlCount, $countTypes, $countParams);
 ?>
 <link rel="stylesheet" href="public/css/navbar.css">
 
@@ -18,34 +81,67 @@ if (session_status() === PHP_SESSION_NONE) {
 
         <div class="collapse navbar-collapse" id="navbarMain">
 
+            <?php $isIndex = basename($_SERVER['PHP_SELF']) == "index.php"; ?>
+
             <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3 w-100">
 
-                <button class="btn btn-light" id="btnCategory">☰ Danh mục</button>
-                <div class="menu dropdown-menu" id="navMenu">
+                <?php if ($isIndex): ?>
 
-                    <ul>
+                    <!-- INDEX: menu custom -->
+                    <button type="button" class="btn btn-light" id="btnCategory">
+                        ☰ Danh mục
+                    </button>
 
-                        <?php foreach ($categories as $c): ?>
+                    <div class="menu dropdown-menu" id="navMenu">
+                        <ul>
+                            <?php foreach ($categories as $c): ?>
+                                <li>
+                                    <a href="view.php?category=<?= $c['id'] ?>">
+                                        <?= $c['name'] ?>
+                                    </a>
+                                </li>
+                            <?php endforeach ?>
+                        </ul>
+                    </div>
 
-                            <li>
-                                <a href="index.php?category=<?= $c['id'] ?>">
-                                    <?= $c['name'] ?>
-                                </a>
-                            </li>
+                <?php else: ?>
 
-                        <?php endforeach ?>
+                    <!-- TRANG KHÁC: dropdown bootstrap -->
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
+                            ☰ Danh mục
+                        </button>
 
-                    </ul>
+                        <ul class="dropdown-menu">
+                            <?php foreach ($categories as $c): ?>
+                                <li>
+                                    <a class="dropdown-item"
+                                        href="view.php?category=<?= $c['id'] ?>">
+                                        <?= $c['name'] ?>
+                                    </a>
+                                </li>
+                            <?php endforeach ?>
+                        </ul>
+                    </div>
 
-                </div>
-                <form action="index" class="search-box flex-grow-1 d-flex align-items-center">
-                    <input class="form-control" type="search" placeholder="Bạn cần tìm gì?">
+                <?php endif; ?>
+                <form action="view.php" method="GET" class="flex-grow-1 mx-3">
+                    <div class="input-group">
 
-                    <svg class="search-icon ms-2" width="18" height="18" xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 512 512"><!--!Font Awesome Free v5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
-                        <path
-                            d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z" />
-                    </svg>
+                        <input
+                            type="search"
+                            name="keyword"
+                            value="<?= htmlspecialchars($keyword) ?>"
+                            class="form-control"
+                            placeholder="Bạn cần tìm gì?">
+
+                        <button
+                            class="btn btn-light"
+                            type="submit">
+                            🔍
+                        </button>
+
+                    </div>
                 </form>
 
                 <div class="d-flex flex-column flex-lg-row gap-2">

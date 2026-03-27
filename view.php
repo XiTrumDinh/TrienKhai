@@ -69,6 +69,7 @@ LIMIT 4"
 
     <!-- Navbar -->
     <?php include_once "navbar.php"; ?>
+    <br>
     <div class="container">
         <div class="banner">
             <img src="public/img/banner1.jpg" alt="Banner">

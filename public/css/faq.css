@@ -20,6 +20,32 @@
     margin-bottom: 10px;
 }
 
+.faq-box p {
+    line-height: 1.8;
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+.faq-sidebar a {
+    display: block;
+    padding: 8px 10px;
+    color: #333;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.faq-sidebar a:hover {
+    background: #f2f2f2;
+}
+
+/* ACTIVE */
+.faq-sidebar a.active {
+    background: #e35d5b;
+    color: #fff;
+    font-weight: 500;
+}
+
 .faq-sidebar ul {
     list-style: none;
     padding: 0;
@@ -53,12 +79,13 @@
 
 
 .faq-box {
-    
+
     min-height: 400px;
     padding: 15px;
     border-radius: 4px;
 }
+
 .faq-box {
-   
+
     line-height: 1.6;
 }

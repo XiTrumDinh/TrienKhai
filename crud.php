@@ -1,10 +1,115 @@
 <?php
 session_start();
-require_once "Database\Database.php";
+require_once "Database/Database.php";
 
 $db = new Database();
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+// Lấy danh sách danh mục để dùng cho form Thêm/Sửa và tránh lỗi "cannot be null"
+$categories = $db->select("SELECT * FROM categories", "", []);
+
+// XỬ LÝ THÊM SẢN PHẨM (ADD)
+if (isset($_POST['addProduct'])) {
+
+    $flash = isset($_POST['flash_sale']) ? 1 : 0;
+    $status = isset($_POST['status']) ? 1 : 0;
+
+    $image = $_FILES['image']['name'];
+    move_uploaded_file($_FILES['image']['tmp_name'], "public/img/" . $image);
+
+    // Kiểm tra và lấy category_id từ form để tránh lỗi Undefined
+    $category_id = isset($_POST['category_id']) && $_POST['category_id'] !== "" ? $_POST['category_id'] : null;
+
+    if ($category_id === null) {
+        echo "<script>alert('Vui lòng chọn danh mục cho sản phẩm!'); window.history.back();</script>";
+        exit();
+    }
+
+    $sql = "INSERT INTO products (name, old_price, price, description, short_description, image, flash_sale, status, category_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    $db->execute($sql, "siisssiii", [
+        $_POST['name'],
+        $_POST['old_price'],
+        $_POST['price'],
+        $_POST['description'],
+        $_POST['short_description'],
+        $image,
+        $flash,
+        $status,
+        $category_id
+    ]);
+
+    header("Location: crud.php");
+    exit();
+}
+
+// XỬ LÝ XÓA SẢN PHẨM (DELETE)
+if (isset($_GET['delete'])) {
+    $sql = "DELETE FROM products WHERE id = ?";
+    $db->execute($sql, "i", [$_GET['delete']]);
+
+    header("Location: crud.php");
+    exit();
+}
+
+// XỬ LÝ CẬP NHẬT SẢN PHẨM (UPDATE)
+if (isset($_POST['updateProduct'])) {
+
+    $flash = isset($_POST['flash_sale']) ? 1 : 0;
+    $status = isset($_POST['status']) ? 1 : 0;
+    $image = $_FILES['image']['name'];
+
+    // Kiểm tra category_id khi sửa
+    $category_id = isset($_POST['category_id']) && $_POST['category_id'] !== "" ? $_POST['category_id'] : null;
+
+    if ($category_id === null) {
+        echo "<script>alert('Vui lòng chọn danh mục cho sản phẩm!'); window.history.back();</script>";
+        exit();
+    }
+
+    if ($image != "") {
+        move_uploaded_file($_FILES['image']['tmp_name'], "public/img/" . $image);
+
+        $sql = "UPDATE products 
+                SET name=?, old_price=?, price=?, description=?, short_description=?, image=?, flash_sale=?, status=?, category_id=? 
+                WHERE id=?";
+
+        $db->execute($sql, "siisssiiii", [
+            $_POST['name'],
+            $_POST['old_price'],
+            $_POST['price'],
+            $_POST['description'],
+            $_POST['short_description'],
+            $image,
+            $flash,
+            $status,
+            $category_id,
+            $_POST['id']
+        ]);
+    } else {
+        $sql = "UPDATE products 
+                SET name=?, old_price=?, price=?, description=?, short_description=?, flash_sale=?, status=?, category_id=? 
+                WHERE id=?";
+
+        $db->execute($sql, "siissiiii", [
+            $_POST['name'],
+            $_POST['old_price'],
+            $_POST['price'],
+            $_POST['description'],
+            $_POST['short_description'],
+            $flash,
+            $status,
+            $category_id,
+            $_POST['id']
+        ]);
+    }
+
+    header("Location: crud.php");
+    exit();
+}
+
+// XỬ LÝ ĐĂNG NHẬP
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['username'])) {
     $username = $_POST["username"];
     $password = $_POST["password"];
 
@@ -19,6 +124,70 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $error = "Sai tài khoản hoặc mật khẩu!";
     }
 }
+
+$keyword = "";
+// chỉ nhận keyword khi ở trang crud.php và có submit từ form
+if (isset($_GET['keyword']) && isset($_GET['from']) && $_GET['from'] === 'crud') {
+    $keyword = trim($_GET['keyword']);
+}
+
+// LẤY CATEGORY ĐỂ LỌC
+$category_filter = isset($_GET['category']) ? $_GET['category'] : '';
+
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = 5;
+if ($page < 1) $page = 1;
+
+$where = [];
+$params = [];
+$types = "";
+
+// 1. Search theo name
+if ($keyword != "") {
+    $where[] = "products.name LIKE ?";
+    $params[] = "%$keyword%";
+    $types .= "s";
+}
+
+// 2. Lọc theo danh mục (MỚI THÊM)
+if ($category_filter != "") {
+    $where[] = "products.category_id = ?";
+    $params[] = $category_filter;
+    $types .= "i";
+}
+
+// Ghép WHERE
+$whereSql = "";
+if (!empty($where)) {
+    $whereSql = "WHERE " . implode(" AND ", $where);
+}
+
+// Count tổng số bản ghi (phải khớp với điều kiện lọc)
+$totalData = $db->select(
+    "SELECT COUNT(*) as total FROM products $whereSql",
+    $types,
+    $params
+);
+
+$total = $totalData[0]['total'];
+$totalPages = ceil($total / $limit);
+if ($totalPages < 1) $totalPages = 1;
+if ($page > $totalPages) $page = $totalPages;
+
+$offset = ($page - 1) * $limit;
+
+// Query lấy dữ liệu chính xác
+$selectParams = $params;
+$selectTypes = $types;
+
+$sql = "SELECT products.*, categories.name AS category_name 
+        FROM products 
+        LEFT JOIN categories ON products.category_id = categories.id
+        $whereSql
+        ORDER BY products.id DESC
+        LIMIT $offset, $limit";
+
+$products = $db->select($sql, $selectTypes, $selectParams);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -42,20 +211,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="container-fluid mt-3">
         <div class="row">
 
-            <!-- SIDEBAR -->
             <div class="col-md-2 sidebar">
                 <h6>Quản lý CRUD</h6>
                 <hr>
                 <ul class="list-unstyled">
-                    <li><a href="#">User</a></li>
-                    <li><a href="#" class="active">Product</a></li>
+                    <li><a href="user.php">User</a></li>
+                    <li><a href="crud.php" class="active">Product</a></li>
                     <li>.....</li>
                     <li>.....</li>
                 </ul>
 
             </div>
 
-            <!-- MAIN CONTENT -->
             <div class="col-md-10 main-content">
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -63,38 +230,57 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
                 <div class="d-flex gap-2 mb-3 flex-wrap">
 
-                    <!-- SEARCH -->
+                    <form method="GET" action="crud.php" class="flex-grow-1">
+                        <div class="input-group">
 
-                    <form action="" class="search-box flex-grow-1 d-flex align-items-center">
-                        <input class="form-control" type="search" placeholder="Bạn cần tìm gì?">
+                            <input type="hidden" name="from" value="crud"> <input
+                                type="search"
+                                name="keyword"
+                                class="form-control"
+                                placeholder="Tìm sản phẩm..."
+                                value="<?= htmlspecialchars($keyword) ?>">
 
-                        <svg class="search-icon ms-2" width="18" height="18" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 512 512"><!--!Font Awesome Free v5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
-                            <path
-                                d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z" />
-                        </svg>
+                            <button class="btn btn-outline-secondary" type="submit">
+                                🔍
+                            </button>
+
+                        </div>
                     </form>
 
-                    <!-- FILTER LOẠI -->
-                    <select id="categoryFilter" class="form-select w-auto">
-                        <option value="">Tất cả</option>
-                        <option value="laptop">Laptop</option>
-                        <option value="pc">PC</option>
-                        <option value="ram">RAM</option>
+                    <?php
+                    $current_cat = isset($_GET['category']) ? $_GET['category'] : '';
+                    ?>
+
+                    <select id="categoryFilter"
+                        class="form-select w-auto"
+                        onchange="filterCategory(this.value)">
+
+                        <option value="">Tất cả danh mục</option>
+
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?= $cat['id'] ?>"
+                                <?= ($current_cat == $cat['id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($cat['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+
                     </select>
-                    <button class="btn btn-success">+ Thêm sản phẩm</button>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
+                        + Thêm sản phẩm
+                    </button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered text-center">
                         <thead class="table-light">
                             <tr>
-                                <th>ID ↑↓</th>
-                                <th>Tên sản phẩm ↑↓</th>
-                                <th>Giá cũ ↑↓</th>
-                                <th>Giá mới ↑↓</th>
+                                <th>ID</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Danh mục</th>
+                                <th>Giá cũ</th>
+                                <th>Giá mới</th>
                                 <th>Mô tả</th>
                                 <th>Mô tả ngắn</th>
-                                <th>Ngày tạo ↑↓</th>
+                                <th>Ngày tạo</th>
                                 <th>Hình ảnh</th>
                                 <th>Flash Sale</th>
                                 <th>Ẩn/Hiện</th>
@@ -103,173 +289,135 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         </thead>
 
                         <tbody>
+                            <?php foreach ($products as $item): ?>
+                                <tr>
+                                    <td><?= $item['id'] ?></td>
+                                    <td><?= $item['name'] ?></td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            <?= htmlspecialchars($item['category_name'] ?? 'Chưa phân loại') ?>
+                                        </span>
+                                    </td>
+                                    <td><?= number_format($item['old_price']) ?></td>
+                                    <td><?= number_format($item['price']) ?></td>
+                                    <td class="limit-50"><?= $item['description'] ?></td>
+                                    <td><?= $item['short_description'] ?></td>
+                                    <td><?= $item['created_at'] ?></td>
+                                    <td>
+                                        <img src="public/img/<?= $item['image'] ?>" width="60">
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" <?= $item['flash_sale'] ? 'checked' : '' ?> disabled>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" <?= $item['status'] ? 'checked' : '' ?> disabled>
+                                    </td>
+                                    <td>
 
-                            <tr>
-                                <td>1</td>
-                                <td>Laptop1</td>
-                                <td>30.000.000</td>
-                                <td>25.000.000</td>
-                                <td class="limit-50">
-                                    Laptop ASUS Vivobook 15 OLED sở hữu thiết kế mỏng nhẹ, màn hình OLED rực rỡ cùng
-                                    hiệu năng mạnh mẽ từ Intel Core i5, phù hợp cho học tập và làm việc văn phòng.
-                                </td>
-                                <td>Intel Core i5 | 16GB RAM | 512GB SSD | OLED</td>
-                                <td>2026-03-15 23:56:33</td>
-                                <td>
-                                    <img src="public/img/laptop1.jpg" width="60">
-                                </td>
-                                <td>
-                                    <input type="checkbox" class="flash-sale">
-                                </td>
+                                        <button class="btn btn-warning btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#edit<?= $item['id'] ?>">
+                                            Edit
+                                        </button>
 
-                                <td>
-                                    <input type="checkbox" class="status" checked>
-                                </td>
+                                        <div class="modal fade" id="edit<?= $item['id'] ?>">
+                                            <div class="modal-dialog">
+                                                <form method="POST" enctype="multipart/form-data">
+                                                    <div class="modal-content p-3 text-start">
+                                                        <h5>Sửa sản phẩm</h5>
 
-                                <td>
-                                    <button class="action-btn btn-edit">Edit</button><br>
-                                    <button class="action-btn btn-delete">Delete</button>
-                                </td>
+                                                        <input type="hidden" name="id" value="<?= $item['id'] ?>">
 
-                            </tr>
+                                                        <label class="mb-1 small text-secondary">Tên sản phẩm</label>
+                                                        <input type="text" name="name" class="form-control mb-2"
+                                                            value="<?= $item['name'] ?>" required>
 
-                            <tr>
-                                <td>1</td>
-                                <td>Laptop1</td>
-                                <td>30.000.000</td>
-                                <td>25.000.000</td>
-                                <td class="limit-50">
-                                    Laptop ASUS Vivobook 15 OLED sở hữu thiết kế mỏng nhẹ, màn hình OLED rực rỡ cùng
-                                    hiệu năng mạnh mẽ từ Intel Core i5, phù hợp cho học tập và làm việc văn phòng.
-                                </td>
-                                <td>Intel Core i5 | 16GB RAM | 512GB SSD | OLED</td>
-                                <td>2026-03-15 23:56:33</td>
-                                <td>
-                                    <img src="public/img/laptop1.jpg" width="60">
-                                </td>
-                                <td>
-                                    <input type="checkbox" class="flash-sale">
-                                </td>
+                                                        <label class="mb-1 small text-secondary">Giá cũ</label>
+                                                        <input type="number" name="old_price" class="form-control mb-2"
+                                                            value="<?= $item['old_price'] ?>">
 
-                                <td>
-                                    <input type="checkbox" class="status" checked>
-                                </td>
+                                                        <label class="mb-1 small text-secondary">Giá mới</label>
+                                                        <input type="number" name="price" class="form-control mb-2"
+                                                            value="<?= $item['price'] ?>" required>
 
-                                <td>
-                                    <button class="action-btn btn-edit">Edit</button><br>
-                                    <button class="action-btn btn-delete">Delete</button>
-                                </td>
+                                                        <label class="mb-1 small text-secondary">Mô tả</label>
+                                                        <textarea name="description" class="form-control mb-2"><?= $item['description'] ?></textarea>
 
-                            </tr>
+                                                        <label class="mb-1 small text-secondary">Mô tả ngắn</label>
+                                                        <input type="text" name="short_description" class="form-control mb-2"
+                                                            value="<?= $item['short_description'] ?>">
 
+                                                        <label class="mb-1 small text-secondary">Ảnh sản phẩm</label>
+                                                        <input type="file" name="image" class="form-control mb-2">
 
-                            <tr>
-                                <td>1</td>
-                                <td>Laptop1</td>
-                                <td>30.000.000</td>
-                                <td>25.000.000</td>
-                                <td class="limit-50">
-                                    Laptop ASUS Vivobook 15 OLED sở hữu thiết kế mỏng nhẹ, màn hình OLED rực rỡ cùng
-                                    hiệu năng mạnh mẽ từ Intel Core i5, phù hợp cho học tập và làm việc văn phòng.
-                                </td>
-                                <td>Intel Core i5 | 16GB RAM | 512GB SSD | OLED</td>
-                                <td>2026-03-15 23:56:33</td>
-                                <td>
-                                    <img src="public/img/laptop1.jpg" width="60">
-                                </td>
-                                <td>
-                                    <input type="checkbox" class="flash-sale">
-                                </td>
+                                                        <label class="mb-1 small text-secondary">Danh mục <span class="text-danger">*</span></label>
+                                                        <select name="category_id" class="form-select mb-2" required>
+                                                            <option value="">-- Chọn danh mục --</option>
+                                                            <?php foreach ($categories as $cat): ?>
+                                                                <option value="<?= $cat['id'] ?>" <?= (isset($item['category_id']) && $item['category_id'] == $cat['id']) ? 'selected' : '' ?>>
+                                                                    <?= $cat['name'] ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        </select>
 
-                                <td>
-                                    <input type="checkbox" class="status" checked>
-                                </td>
+                                                        <label>
+                                                            <input type="checkbox" name="flash_sale" value="1"
+                                                                <?= $item['flash_sale'] ? 'checked' : '' ?>>
+                                                            Flash Sale
+                                                        </label>
 
-                                <td>
-                                    <button class="action-btn btn-edit">Edit</button><br>
-                                    <button class="action-btn btn-delete">Delete</button>
-                                </td>
+                                                        <label class="ms-3">
+                                                            <input type="checkbox" name="status" value="1"
+                                                                <?= $item['status'] ? 'checked' : '' ?>>
+                                                            Hiển thị
+                                                        </label>
 
-                            </tr>
+                                                        <br><br>
 
+                                                        <button name="updateProduct" class="btn btn-primary">Cập nhật</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
 
-                            <tr>
-                                <td>1</td>
-                                <td>Laptop1</td>
-                                <td>30.000.000</td>
-                                <td>25.000.000</td>
-                                <td class="limit-50">
-                                    Laptop ASUS Vivobook 15 OLED sở hữu thiết kế mỏng nhẹ, màn hình OLED rực rỡ cùng
-                                    hiệu năng mạnh mẽ từ Intel Core i5, phù hợp cho học tập và làm việc văn phòng.
-                                </td>
-                                <td>Intel Core i5 | 16GB RAM | 512GB SSD | OLED</td>
-                                <td>2026-03-15 23:56:33</td>
-                                <td>
-                                    <img src="public/img/laptop1.jpg" width="60">
-                                </td>
-                                <td>
-                                    <input type="checkbox" class="flash-sale">
-                                </td>
+                                        <br>
 
-                                <td>
-                                    <input type="checkbox" class="status" checked>
-                                </td>
+                                        <a href="?delete=<?= $item['id'] ?>"
+                                            class="btn btn-danger btn-sm mt-1"
+                                            onclick="return confirm('Xóa sản phẩm này?')">
+                                            Delete
+                                        </a>
 
-                                <td>
-                                    <button class="action-btn btn-edit">Edit</button><br>
-                                    <button class="action-btn btn-delete">Delete</button>
-                                </td>
-
-                            </tr>
-
-
-                            <tr>
-                                <td>1</td>
-                                <td>Laptop1</td>
-                                <td>30.000.000</td>
-                                <td>25.000.000</td>
-                                <td class="limit-50">
-                                    Laptop ASUS Vivobook 15 OLED sở hữu thiết kế mỏng nhẹ, màn hình OLED rực rỡ cùng
-                                    hiệu năng mạnh mẽ từ Intel Core i5, phù hợp cho học tập và làm việc văn phòng.
-                                </td>
-                                <td>Intel Core i5 | 16GB RAM | 512GB SSD | OLED</td>
-                                <td>2026-03-15 23:56:33</td>
-                                <td>
-                                    <img src="public/img/laptop1.jpg" width="60">
-                                </td>
-                                <td>
-                                    <input type="checkbox" class="flash-sale">
-                                </td>
-
-                                <td>
-                                    <input type="checkbox" class="status" checked>
-                                </td>
-
-                                <td>
-                                    <button class="action-btn btn-edit">Edit</button><br>
-                                    <button class="action-btn btn-delete">Delete</button>
-                                </td>
-
-                            </tr>
-
-
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
                         </tbody>
-
 
                     </table>
 
                 </div>
                 <div class="pagination">
 
-                    <a class="page-btn" href="#">«</a>
+                    <?php if ($page > 1): ?>
+                        <a class="page-btn"
+                            href="?page=<?= $page - 1 ?>&keyword=<?= urlencode($keyword) ?>&category=<?= $category_filter ?>&from=crud">
+                            «
+                        </a>
+                    <?php endif; ?>
 
-                    <a class="page-btn active" href="#">1</a>
-                    <a class="page-btn" href="#">2</a>
-                    <a class="page-btn" href="#">3</a>
-                    <a class="page-btn" href="#">4</a>
-                    <a class="page-btn" href="#">5</a>
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a class="page-btn <?= ($i == $page) ? 'active' : '' ?>"
+                            href="?page=<?= $i ?>&keyword=<?= urlencode($keyword) ?>&category=<?= $category_filter ?>&from=crud">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
 
-                    <a class="page-btn" href="#">»</a>
+                    <?php if ($page < $totalPages): ?>
+                        <a class="page-btn"
+                            href="?page=<?= $page + 1 ?>&keyword=<?= urlencode($keyword) ?>&category=<?= $category_filter ?>&from=crud">
+                            »
+                        </a>
+                    <?php endif; ?>
 
                 </div>
             </div>
@@ -283,5 +431,62 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <script src="public/js/footer.js"></script>
     <script src="public/js/CRUD.js"></script>
 </body>
+
+<div class="modal fade" id="addModal">
+    <div class="modal-dialog">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="modal-content p-3">
+                <h5>Thêm sản phẩm</h5>
+
+                <input type="text" name="name" class="form-control mb-2" placeholder="Tên sản phẩm" required>
+
+                <input type="number" name="old_price" class="form-control mb-2" placeholder="Giá cũ">
+
+                <input type="number" name="price" class="form-control mb-2" placeholder="Giá mới" required>
+
+                <textarea name="description" class="form-control mb-2" placeholder="Mô tả"></textarea>
+
+                <input type="text" name="short_description" class="form-control mb-2" placeholder="Mô tả ngắn">
+
+                <input type="file" name="image" class="form-control mb-2">
+
+                <select name="category_id" class="form-select mb-2" required>
+                    <option value="">-- Chọn danh mục --</option>
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?= $cat['id'] ?>"><?= $cat['name'] ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                <label>
+                    <input type="checkbox" name="flash_sale" value="1"> Flash Sale
+                </label>
+
+                <label class="ms-3">
+                    <input type="checkbox" name="status" value="1" checked> Hiển thị
+                </label>
+
+                <br><br>
+
+                <button name="addProduct" class="btn btn-success">Thêm</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    function filterCategory(catId) {
+        const url = new URL(window.location.href);
+
+        if (catId) {
+            url.searchParams.set("category", catId);
+        } else {
+            url.searchParams.delete("category");
+        }
+
+        url.searchParams.set("page", 1);
+        url.searchParams.set("from", "crud");
+
+        window.location.href = url.toString();
+    }
+</script>
 
 </html>

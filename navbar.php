@@ -145,6 +145,9 @@ $total = $db->count($sqlCount, $countTypes, $countParams);
                 </form>
 
                 <div class="d-flex flex-column flex-lg-row gap-2">
+                    <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === "admin"): ?>
+                        <a href="crud.php" class="btn btn-light">CRUD</a>
+                    <?php endif; ?>
                     <button class="btn btn-light">Tra cứu đơn hàng</button>
                     <a href="cart.php" class="btn btn-light">Giỏ hàng</a>
                     <?php if (isset($_SESSION["user"])): ?>

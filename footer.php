@@ -7,6 +7,7 @@
         <div class="footer-item">
             <h6 class="footer-title">Về KIPEEDA <span>+</span></h6>
             <div class="footer-content">
+                <a href="faq.php">FAQ</a>
                 <p>Giới thiệu</p>
                 <p>Tuyển dụng</p>
                 <p>Liên hệ</p>

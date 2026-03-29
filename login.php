@@ -13,6 +13,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if (!empty($user)) {
         $_SESSION["user"] = $user[0]["username"];
+        $_SESSION["role"] = $user[0]["role"];   // thêm dòng này
+
         header("Location: index.php");
         exit();
     } else {
@@ -32,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <link rel="stylesheet" href="public/css/style.css">
     <link rel="stylesheet" href="public/css/login.css">
-   
+
 </head>
 
 <body>

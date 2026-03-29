@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th3 15, 2026 lúc 10:43 PM
--- Phiên bản máy phục vụ: 10.4.32-MariaDB
--- Phiên bản PHP: 8.2.12
+-- Máy chủ: 127.0.0.1:3306
+-- Thời gian đã tạo: Th3 29, 2026 lúc 08:14 PM
+-- Phiên bản máy phục vụ: 8.4.7
+-- Phiên bản PHP: 8.3.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Cơ sở dữ liệu: `kipeeda`
 --
-CREATE DATABASE IF NOT EXISTS `kipeeda` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `kipeeda`;
 
 -- --------------------------------------------------------
 
@@ -29,26 +27,30 @@ USE `kipeeda`;
 -- Cấu trúc bảng cho bảng `categories`
 --
 
-CREATE TABLE `categories` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `categories`;
+CREATE TABLE IF NOT EXISTS `categories` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `image` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `categories`
 --
 
-INSERT INTO `categories` (`id`, `name`) VALUES
-(1, 'Laptop'),
-(2, 'Laptop Gaming'),
-(3, 'Build PC'),
-(4, 'Màn Hình'),
-(5, 'Bàn Phím'),
-(6, 'Chuột, Lót Chuột'),
-(7, 'Ổ Cứng, Ram'),
-(8, 'Ghế, Bàn Gaming'),
-(9, 'Tai Nghe'),
-(10, 'Phụ Kiện');
+INSERT INTO `categories` (`id`, `name`, `image`) VALUES
+(1, 'Laptop', 'public\\img\\big_banner1.jpg'),
+(2, 'Laptop Gaming', 'public\\img\\big_banner2.jpg'),
+(3, 'Build PC', 'public\\img\\big_banner3.jpg'),
+(4, 'Màn Hình', 'public\\img\\big_banner4.jpg'),
+(5, 'Bàn Phím', 'public\\img\\big_banner5.jpg'),
+(6, 'Chuột, Lót Chuột', 'public\\img\\big_banner6.jpg'),
+(7, 'Ổ Cứng, Ram', 'public\\img\\banner1.jpg'),
+(8, 'Ghế, Bàn Gaming', 'public\\img\\banner2.jpg'),
+(9, 'Tai Nghe', 'public\\img\\big_banner4.jpg'),
+(10, 'Phụ Kiện', 'public\\img\\big_banner6.jpg'),
+(11, 'Flashsale', 'public\\img\\flash_sale1.jpg');
 
 -- --------------------------------------------------------
 
@@ -56,30 +58,32 @@ INSERT INTO `categories` (`id`, `name`) VALUES
 -- Cấu trúc bảng cho bảng `products`
 --
 
-CREATE TABLE `products` (
-  `id` int(11) NOT NULL,
-  `name` varchar(500) NOT NULL,
+DROP TABLE IF EXISTS `products`;
+CREATE TABLE IF NOT EXISTS `products` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(500) COLLATE utf8mb4_general_ci NOT NULL,
   `price` decimal(10,0) NOT NULL,
   `old_price` decimal(10,0) DEFAULT NULL,
-  `image` varchar(255) NOT NULL,
-  `description` text NOT NULL,
-  `short_description` text NOT NULL,
-  `category_id` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `status` tinyint(4) NOT NULL,
-  `flash_sale` tinyint(4) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `image` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci NOT NULL,
+  `short_description` text COLLATE utf8mb4_general_ci NOT NULL,
+  `category_id` int NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` tinyint NOT NULL,
+  `flash_sale` tinyint DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `fk_categories_product` (`category_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `products`
 --
 
 INSERT INTO `products` (`id`, `name`, `price`, `old_price`, `image`, `description`, `short_description`, `category_id`, `created_at`, `status`, `flash_sale`) VALUES
-(41, 'Laptop ASUS Vivobook 15 OLED', 15990000, 17990000, 'laptop1.jpg', 'Laptop ASUS Vivobook 15 OLED sở hữu thiết kế mỏng nhẹ, màn hình OLED rực rỡ cùng hiệu năng mạnh mẽ từ Intel Core i5, phù hợp cho học tập và làm việc văn phòng.', 'Intel Core i5 | 16GB RAM | 512GB SSD | OLED', 1, '2026-03-15 16:56:33', 1, 0),
-(42, 'Laptop Dell Inspiron 15 3530', 16490000, 18490000, 'laptop2.jpg', 'Dell Inspiron 15 3530 mang đến hiệu năng ổn định với Intel Core i5 thế hệ mới, màn hình lớn 15.6 inch giúp làm việc và giải trí thoải mái.', 'Core i5 Gen 13 | 16GB | 512GB SSD', 1, '2026-03-15 16:56:33', 1, 0),
+(42, 'Laptop Dell Inspiron 15 3530', 16490000, 18490000, 'laptop2.jpg', 'Dell Inspiron 15 3530 mang đến hiệu năng ổn định với Intel Core i5 thế hệ mới, màn hình lớn 15.6 inch giúp làm việc và giải trí thoải mái.', 'Core i5 Gen 13 | 16GB | 512GB SSD', 10, '2026-03-15 16:56:33', 1, 0),
 (43, 'Laptop Lenovo IdeaPad Slim 5', 14990000, 16990000, 'laptop3.jpg', 'Lenovo IdeaPad Slim 5 có thiết kế gọn nhẹ, pin bền bỉ cùng hiệu năng ổn định cho sinh viên và dân văn phòng.', 'Ryzen 5 | 16GB RAM | 512GB SSD', 1, '2026-03-15 16:56:33', 1, 0),
 (44, 'Laptop HP Pavilion 15', 17490000, 15970000, 'laptop4.jpg', 'HP Pavilion 15 là chiếc laptop đa năng với thiết kế sang trọng, hiệu năng tốt đáp ứng mọi nhu cầu học tập và làm việc.', 'Core i5 | 16GB | 512GB SSD', 1, '2026-03-15 16:56:33', 1, 1),
-(45, 'Laptop Gaming ASUS ROG Strix G15', 28990000, 31990000, 'gaming1.jpg', 'ASUS ROG Strix G15 là laptop gaming mạnh mẽ với RTX 4060, màn hình 165Hz cho trải nghiệm chiến game mượt mà.', 'Ryzen 7 | RTX 4060 | 16GB | 512GB', 2, '2026-03-15 16:56:33', 1, 0),
+(45, 'Laptop Gaming ASUS ROG Strix G15', 28990000, 31990000, 'gaming1.jpg', 'ASUS ROG Strix G15 là laptop gaming mạnh mẽ với RTX 4060, màn hình 165Hz cho trải nghiệm chiến game mượt mà.', 'Ryzen 7 | RTX 4060 | 16GB | 512GB', 11, '2026-03-15 16:56:33', 1, 0),
 (46, 'Laptop Gaming Acer Predator Helios Neo', 30990000, 33990000, 'gaming2.jpg', 'Acer Predator Helios Neo mang sức mạnh từ Intel Core i7 và RTX 4060, sẵn sàng chinh phục mọi tựa game AAA.', 'Core i7 | RTX 4060 | 16GB | 1TB SSD', 2, '2026-03-15 16:56:33', 1, 0),
 (47, 'Laptop Gaming MSI Katana 15', 26990000, 29990000, 'gaming3.jpg', 'MSI Katana 15 sở hữu thiết kế chuẩn gaming cùng card đồ họa RTX 4050 cho hiệu năng chiến game ổn định.', 'Core i7 | RTX 4050 | 16GB | 512GB', 2, '2026-03-15 16:56:33', 1, 0),
 (48, 'Laptop Gaming Lenovo Legion 5', 29990000, 32990000, 'gaming4.jpg', 'Lenovo Legion 5 nổi tiếng với hiệu năng mạnh mẽ, hệ thống tản nhiệt tối ưu cho game thủ.', 'Ryzen 7 | RTX 4060 | 16GB', 2, '2026-03-15 16:56:33', 1, 0),
@@ -91,7 +95,7 @@ INSERT INTO `products` (`id`, `name`, `price`, `old_price`, `image`, `descriptio
 (54, 'Màn hình MSI Optix 27 inch 170Hz', 5290000, 5890000, 'monitor2.jpg', 'MSI Optix 27 inch là màn hình gaming với tần số quét 170Hz cùng màu sắc sống động.', '27 inch | 170Hz | IPS', 4, '2026-03-15 16:56:33', 1, 0),
 (55, 'Màn hình LG UltraGear 27 inch', 6190000, 6890000, 'monitor3.jpg', 'LG UltraGear mang đến trải nghiệm gaming mượt mà và hình ảnh sắc nét.', '27 inch | 180Hz', 4, '2026-03-15 16:56:33', 1, 0),
 (56, 'Màn hình Dell 24 inch IPS', 3190000, 3790000, 'monitor4.jpg', 'Màn hình Dell 24 inch phù hợp làm việc và giải trí với tấm nền IPS.', '24 inch | IPS', 4, '2026-03-15 16:56:33', 1, 1),
-(57, 'Bàn phím cơ AKKO 3087 RGB', 1290000, 1490000, 'keyboard1.jpg', 'AKKO 3087 RGB là bàn phím cơ được game thủ yêu thích với thiết kế nhỏ gọn và LED RGB đẹp mắt.', 'Switch Red | RGB', 5, '2026-03-15 16:56:33', 1, 0),
+(57, 'Bàn phím cơ AKKO 3087 RGB', 1290000, 1490000, 'keyboard1.jpg', 'AKKO 3087 RGB là bàn phím cơ được game thủ yêu thích với thiết kế nhỏ gọn và LED RGB đẹp mắt.', 'Switch Red | RGB', 2, '2026-03-15 16:56:33', 1, 0),
 (58, 'Bàn phím cơ Razer BlackWidow V3', 2890000, 3190000, 'keyboard2.jpg', 'Razer BlackWidow V3 mang lại cảm giác gõ tuyệt vời cùng độ bền cao.', 'Switch Green | RGB', 5, '2026-03-15 16:56:33', 1, 0),
 (59, 'Bàn phím Logitech G Pro', 2590000, 2890000, 'keyboard3.jpg', 'Logitech G Pro là bàn phím esports dành cho game thủ chuyên nghiệp.', 'Switch GX', 5, '2026-03-15 16:56:33', 1, 1),
 (60, 'Bàn phím DareU EK87', 990000, 1190000, 'keyboard4.jpg', 'DareU EK87 là bàn phím cơ giá tốt dành cho game thủ.', 'Switch Blue', 5, '2026-03-15 16:56:33', 1, 0),
@@ -114,7 +118,12 @@ INSERT INTO `products` (`id`, `name`, `price`, `old_price`, `image`, `descriptio
 (77, 'Lót chuột Gaming XXL RGB', 250000, 350000, 'pad1.jpg', 'Lót chuột gaming kích thước lớn với LED RGB.', 'Size XXL', 6, '2026-03-15 16:56:33', 1, 0),
 (78, 'Webcam Logitech C920', 1950000, 2250000, 'webcam1.jpg', 'Webcam Logitech C920 hỗ trợ quay video Full HD cho stream và họp online.', 'Full HD 1080p', 10, '2026-03-15 16:56:33', 1, 0),
 (79, 'Hub USB Type C 6 in 1', 450000, 550000, 'hub1.jpg', 'Hub USB Type C mở rộng cổng kết nối cho laptop.', '6 in 1', 10, '2026-03-15 16:56:33', 1, 0),
-(80, 'Đế tản nhiệt laptop RGB', 350000, 420000, 'cooler1.jpg', 'Đế tản nhiệt laptop giúp giảm nhiệt độ khi chơi game.', 'RGB Cooling Pad', 10, '2026-03-15 16:56:33', 1, 0);
+(80, 'Đế tản nhiệt laptop RGB', 350000, 420000, 'cooler1.jpg', 'Đế tản nhiệt laptop giúp giảm nhiệt độ khi chơi game.', 'RGB Cooling Pad', 10, '2026-03-15 16:56:33', 1, 0),
+(85, 'DTA', 3, 2, 'hinh\\hinh1.jpg', '1', '2', 1, '2026-03-29 15:45:12', 1, 0),
+(86, 'DTA', 3, 2, '1', '2', '3', 1, '2026-03-29 15:47:15', 1, 0),
+(87, 'DTA', 4, 3, 'hinh\\hinh1.jpg', '2', '1', 1, '2026-03-29 15:49:45', 1, 0),
+(88, 'DTA', 4, 3, 'hinh\\hinh1.jpg', '2', '2', 1, '2026-03-29 15:54:14', 1, 0),
+(94, 'DTA', 12, 1, '', '2', '4', 10, '2026-03-29 18:22:38', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -122,23 +131,21 @@ INSERT INTO `products` (`id`, `name`, `price`, `old_price`, `image`, `descriptio
 -- Cấu trúc bảng cho bảng `product_specs`
 --
 
-CREATE TABLE `product_specs` (
-  `id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `spec_name` varchar(250) NOT NULL,
-  `spec_value` varchar(250) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `product_specs`;
+CREATE TABLE IF NOT EXISTS `product_specs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `product_id` int NOT NULL,
+  `spec_name` varchar(250) COLLATE utf8mb4_general_ci NOT NULL,
+  `spec_value` varchar(250) COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_specs_products` (`product_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=180 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `product_specs`
 --
 
 INSERT INTO `product_specs` (`id`, `product_id`, `spec_name`, `spec_value`) VALUES
-(1, 41, 'CPU', 'Intel Core i5'),
-(2, 41, 'RAM', '16GB DDR4'),
-(3, 41, 'Ổ cứng', '512GB SSD'),
-(4, 41, 'Màn hình', '15.6 inch OLED'),
-(5, 41, 'Pin', '50Wh'),
 (6, 42, 'CPU', 'Intel Core i5 Gen 13'),
 (7, 42, 'RAM', '16GB'),
 (8, 42, 'Ổ cứng', '512GB SSD'),
@@ -320,83 +327,36 @@ INSERT INTO `product_specs` (`id`, `product_id`, `spec_name`, `spec_value`) VALU
 -- Cấu trúc bảng cho bảng `users`
 --
 
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `username` varchar(100) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `role` enum('admin','user') COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Đang đổ dữ liệu cho bảng `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `password`, `email`, `role`) VALUES
+(1, 'admin', '1234', NULL, 'admin'),
+(2, 'user1', '1234', NULL, 'user');
+
+--
+-- Ràng buộc đối với các bảng kết xuất
 --
 
 --
--- Chỉ mục cho bảng `categories`
---
-ALTER TABLE `categories`
-  ADD PRIMARY KEY (`id`);
-
---
--- Chỉ mục cho bảng `products`
+-- Ràng buộc cho bảng `products`
 --
 ALTER TABLE `products`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_categories_product` (`category_id`);
+  ADD CONSTRAINT `fk_categories_product` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
 
 --
--- Chỉ mục cho bảng `product_specs`
---
-ALTER TABLE `product_specs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_specs_products` (`product_id`);
-
---
--- Chỉ mục cho bảng `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT cho các bảng đã đổ
---
-
---
--- AUTO_INCREMENT cho bảng `categories`
---
-ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT cho bảng `products`
---
-ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
-
---
--- AUTO_INCREMENT cho bảng `product_specs`
---
-ALTER TABLE `product_specs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=180;
-
---
--- AUTO_INCREMENT cho bảng `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- Các ràng buộc cho các bảng đã đổ
---
-
---
--- Các ràng buộc cho bảng `products`
---
-ALTER TABLE `products`
-  ADD CONSTRAINT `fk_categories_product` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
-
---
--- Các ràng buộc cho bảng `product_specs`
+-- Ràng buộc cho bảng `product_specs`
 --
 ALTER TABLE `product_specs`
   ADD CONSTRAINT `fk_specs_products` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);

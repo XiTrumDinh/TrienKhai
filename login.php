@@ -1,5 +1,18 @@
 <?php
 session_start();
+if (!isset($_SESSION["user"])) {
+    header("Location: login.php");
+    exit();
+}
+if (isset($_SESSION["user"])) {
+    header("Location: index.php");
+    exit();
+}
+// không phải admin -> chặn
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
+    header("Location: index.php");
+    exit();
+}
 require_once "Database\Database.php";
 
 $db = new Database();

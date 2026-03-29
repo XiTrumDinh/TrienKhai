@@ -7,35 +7,33 @@
         <div class="footer-item">
             <h6 class="footer-title">Về KIPEEDA <span>+</span></h6>
             <div class="footer-content">
-                <a href="faq.php">FAQ</a>
-                <p>Giới thiệu</p>
-                <p>Tuyển dụng</p>
-                <p>Liên hệ</p>
+                <p><a href="faq.php?type=gioithieu">Giới thiệu</a></p>
+                <p><a href="faq.php?type=tuyendung">Tuyển dụng</a></p>
+                <p><a href="faq.php?type=lienhe">Liên hệ</a></p>
             </div>
         </div>
 
         <div class="footer-item">
             <h6 class="footer-title">Chính sách <span>+</span></h6>
             <div class="footer-content">
-                <p>Chính sách bảo hành</p>
-                <p>Chính sách giao hàng</p>
-                <p>Chính sách bảo mật</p>
-                <p>Chính sách trả góp</p>
+                <p><a href="faq.php?type=baohanh">Chính sách bảo hành</a></p>
+                <p><a href="faq.php?type=giaohang">Chính sách giao hàng</a></p>
+                <p> <a href="faq.php?type=baomat">Chính sách bảo mật</a></p>
+                <p><a href="faq.php?type=tragop">Chính sách trả góp</a></p>
             </div>
         </div>
 
         <div class="footer-item">
             <h6 class="footer-title">Thông tin <span>+</span></h6>
             <div class="footer-content">
-                <p>Hệ thống cửa hàng</p>
-                <p>Hướng dẫn mua hàng</p>
-                <p>Hướng dẫn thanh toán</p>
-                <p>Hướng dẫn trả góp</p>
-                <p>Hướng dẫn bảo hành</p>
-                <p>Build PC</p>
+                <p><a href="faq.php?type=cuahang">Hệ thống cửa hàng</a></p>
+                <p><a href="faq.php?type=muahang">Hướng dẫn mua hàng</a></p>
+                <p><a href="faq.php?type=thanhtoan">Hướng dẫn thanh toán</a></p>
+                <p><a href="faq.php?type=tragop_hd">Hướng dẫn trả góp</a></p>
+                <p> <a href="faq.php?type=baohanh_hd">Hướng dẫn bảo hành</a></p>
+                <p><a href="faq.php?type=buildpc">Build PC</a></p>
             </div>
         </div>
-
         <div class="footer-item">
             <h6 class="footer-title">Tổng đài hỗ trợ <span>+</span></h6>
             <div class="footer-content">
@@ -79,3 +77,4 @@
     </div>
 
 </footer>
+

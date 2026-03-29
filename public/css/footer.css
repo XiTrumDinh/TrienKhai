@@ -18,6 +18,20 @@ footer {
     min-width: 180px;
 }
 
+.footer-content a {
+    text-decoration: none;
+    /* bỏ gạch chân */
+    color: #333;
+    /* đổi màu chữ */
+    display: block;
+    transition: 0.2s;
+}
+
+/* hover cho đẹp */
+.footer-content a:hover {
+    color: #e35d5b;
+}
+
 .footer-title {
     font-weight: bold;
     margin-bottom: 10px;
@@ -64,14 +78,16 @@ footer {
     }
 
 }
-.footer-content svg{
-width:20px;
-height:20px;
-fill:#333;
-margin-right:6px;
+
+.footer-content svg {
+    width: 20px;
+    height: 20px;
+    fill: #333;
+    margin-right: 6px;
 }
-.social{
-display:flex;
-align-items:center;
-gap:8px;
+
+.social {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }

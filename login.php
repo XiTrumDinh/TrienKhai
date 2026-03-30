@@ -6,7 +6,7 @@ if (isset($_SESSION["user"])) {
     exit();
 }
 
-require_once "Database\Database.php";
+require_once "Database/Database.php";
 
 $db = new Database();
 

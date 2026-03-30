@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "Database\Database.php";
+require_once "Database/Database.php";
 $type = $_GET['type'] ?? 'gioithieu';
 $db = new Database();
 

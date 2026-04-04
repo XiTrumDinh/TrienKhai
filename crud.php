@@ -136,6 +136,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['username'])) {
 }
 
 $keyword = "";
+// SORT
+$sort = $_GET['sort'] ?? 'id';
+$order = $_GET['order'] ?? 'desc';
+
+$allowedSort = [
+    'id',
+    'name',
+    'old_price',
+    'price',
+    'created_at',
+    'category_name'
+];
+
+if (!in_array($sort, $allowedSort)) {
+    $sort = 'id';
+}
+
+$order = $order === 'asc' ? 'asc' : 'desc';
+
+// arrow icon
+function arrow($column, $sort, $order)
+{
+    if ($column == $sort) {
+        return $order == 'asc' ? '↑' : '↓';
+    }
+    return '⇅';
+}
 // chỉ nhận keyword khi ở trang crud.php và có submit từ form
 if (isset($_GET['keyword']) && isset($_GET['from']) && $_GET['from'] === 'crud') {
     $keyword = trim($_GET['keyword']);
@@ -194,10 +221,11 @@ $sql = "SELECT products.*, categories.name AS category_name
         FROM products 
         LEFT JOIN categories ON products.category_id = categories.id
         $whereSql
-        ORDER BY products.id DESC
+        ORDER BY $sort $order
         LIMIT $offset, $limit";
 
 $products = $db->select($sql, $selectTypes, $selectParams);
+
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -283,14 +311,44 @@ $products = $db->select($sql, $selectTypes, $selectParams);
                     <table class="table table-bordered text-center">
                         <thead class="table-light">
                             <tr>
-                                <th>ID</th>
-                                <th>Tên sản phẩm</th>
-                                <th>Danh mục</th>
-                                <th>Giá cũ</th>
-                                <th>Giá mới</th>
+                                <th>
+                                    <a href="?sort=id&order=<?= $order == 'asc' ? 'desc' : 'asc' ?>">
+                                        ID <?= arrow('id', $sort, $order) ?>
+                                    </a>
+                                </th>
+
+                                <th>
+                                    <a href="?sort=name&order=<?= $order == 'asc' ? 'desc' : 'asc' ?>">
+                                        Tên sản phẩm <?= arrow('name', $sort, $order) ?>
+                                    </a>
+                                </th>
+
+                                <th>
+                                    <a href="?sort=category_name&order=<?= $order == 'asc' ? 'desc' : 'asc' ?>">
+                                        Danh mục <?= arrow('category_name', $sort, $order) ?>
+                                    </a>
+                                </th>
+
+                                <th>
+                                    <a href="?sort=old_price&order=<?= $order == 'asc' ? 'desc' : 'asc' ?>">
+                                        Giá cũ <?= arrow('old_price', $sort, $order) ?>
+                                    </a>
+                                </th>
+
+                                <th>
+                                    <a href="?sort=price&order=<?= $order == 'asc' ? 'desc' : 'asc' ?>">
+                                        Giá mới <?= arrow('price', $sort, $order) ?>
+                                    </a>
+                                </th>
+
                                 <th>Mô tả</th>
                                 <th>Mô tả ngắn</th>
-                                <th>Ngày tạo</th>
+
+                                <th>
+                                    <a href="?sort=created_at&order=<?= $order == 'asc' ? 'desc' : 'asc' ?>">
+                                        Ngày tạo <?= arrow('created_at', $sort, $order) ?>
+                                    </a>
+                                </th>
                                 <th>Hình ảnh</th>
                                 <th>Flash Sale</th>
                                 <th>Ẩn/Hiện</th>
@@ -314,13 +372,13 @@ $products = $db->select($sql, $selectTypes, $selectParams);
                                     <td><?= $item['short_description'] ?></td>
                                     <td><?= $item['created_at'] ?></td>
                                     <td>
-                                        <img src="public/img/<?= $item['image'] ?>" width="60">
+                                        <img src="public/img/<?= $item['image'] ?>" alt="ảnh" width="60">
                                     </td>
                                     <td>
-                                        <input type="checkbox" <?= $item['flash_sale'] ? 'checked' : '' ?> disabled>
+                                        <input type="checkbox" <?= $item['flash_sale'] ? 'checked' : '' ?>>
                                     </td>
                                     <td>
-                                        <input type="checkbox" <?= $item['status'] ? 'checked' : '' ?> disabled>
+                                        <input type="checkbox" <?= $item['status'] ? 'checked' : '' ?>>
                                     </td>
                                     <td>
 

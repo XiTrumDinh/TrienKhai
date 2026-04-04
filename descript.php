@@ -194,25 +194,25 @@ $similar = $db->select(
 
             <div class="col-lg-4 col-12">
 
+
+
                 <div class="p-3 border rounded">
                     <h4>Thông số</h4>
-                    <div class="p-3 border rounded">
-                        <h4>Thông số</h4>
 
-                        <table class="table">
+                    <table class="table">
 
-                            <?php foreach ($specs as $s): ?>
+                        <?php foreach ($specs as $s): ?>
 
-                                <tr>
-                                    <td><?= $s['spec_name'] ?></td>
-                                    <td><?= $s['spec_value'] ?></td>
-                                </tr>
+                            <tr>
+                                <td><?= $s['spec_name'] ?></td>
+                                <td><?= $s['spec_value'] ?></td>
+                            </tr>
 
-                            <?php endforeach; ?>
+                        <?php endforeach; ?>
 
-                        </table>
-                    </div>
+                    </table>
                 </div>
+
 
                 <div class="p-3 border rounded mt-3">
                     <h4>Đánh giá người dùng</h4>

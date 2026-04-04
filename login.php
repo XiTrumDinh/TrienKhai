@@ -24,7 +24,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         header("Location: index.php");
         exit();
     } else {
-        $error = "Sai tài khoản hoặc mật khẩu!";
+        $_SESSION["error"] = "Sai tài khoản hoặc mật khẩu!";
+        header("Location: login.php");
+        exit();
     }
 }
 ?>
@@ -52,10 +54,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             <h3 class="text-center mb-4">Đăng nhập</h3>
 
-            <?php if (!empty($error)): ?>
+            <?php if (!empty($_SESSION['error'])): ?>
                 <div class="alert alert-danger">
-                    <?= $error ?>
+                    <?= $_SESSION['error'] ?>
                 </div>
+                <?php unset($_SESSION['error']); ?>
             <?php endif; ?>
 
             <form method="POST">

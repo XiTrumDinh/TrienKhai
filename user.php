@@ -223,7 +223,7 @@ $users = $db->select($sql, $types, $params);
                                 <th>Mật khẩu </th>
                                 <th>Email </th>
                                 <th>Role</th>
-
+                                <th>Action</th>
                             </tr>
                         </thead>
 
@@ -237,7 +237,7 @@ $users = $db->select($sql, $types, $params);
                                     <td><?= $u["role"] ?></td>
 
                                     <td>
-                                        <button class="btn btn-warning btn-sm"
+                                        <button class="btn btn-warning btn-sm mb-1"
                                             data-bs-toggle="modal"
                                             data-bs-target="#edit<?= $u["id"] ?>">
                                             Edit
@@ -260,7 +260,7 @@ $users = $db->select($sql, $types, $params);
                                                         <input type="email" name="email" class="form-control mb-2"
                                                             value="<?= $u["email"] ?>">
 
-                                                        <select name="role" class="form-control mb-2">
+                                                        <select name="role" class="form-control mb-2 ">
                                                             <option value="user" <?= $u["role"] == "user" ? "selected" : "" ?>>User</option>
                                                             <option value="admin" <?= $u["role"] == "admin" ? "selected" : "" ?>>Admin</option>
                                                         </select>

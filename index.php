@@ -71,7 +71,7 @@ LIMIT 4"
         <div class="home-banner">
 
             <!-- MENU -->
-             <div id="overlay"></div>
+            <div id="overlay"></div>
             <div class="menu" id="bannerMenu">
                 <ul>
 
@@ -192,7 +192,7 @@ LIMIT 4"
 
 
     </section>
-<br>
+    <br>
 
     <!-- Banner Khueyen mai -->
     <section class="container">
@@ -259,7 +259,7 @@ LIMIT 4"
     </section>
 
 
-    
+
     <div class="text-center mt-4 mb-4">
         <a href="view.php"
             class="btn btn-danger px-4 py-2">

@@ -40,101 +40,114 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <?php include "navbar.php"; ?>
 
     <div class="faq-container">
-
-        <!-- SIDEBAR -->
         <div class="faq-sidebar">
 
-            <!-- VỀ KIPEEDA -->
-            <h5>Về KIPEEDA</h5>
-            <ul>
-                <li>
-                    <a href="faq.php?type=gioithieu" class="<?= $type == 'gioithieu' ? 'active' : '' ?>">
-                        Giới thiệu
-                    </a>
-                </li>
+            <!-- MOBILE (accordion) -->
+            <div class="faq-mobile d-md-none">
 
-                <li>
-                    <a href="faq.php?type=tuyendung" class="<?= $type == 'tuyendung' ? 'active' : '' ?>">
-                        Tuyển dụng
-                    </a>
-                </li>
+                <div class="faq-item <?= in_array($type, ['gioithieu', 'tuyendung', 'lienhe']) ? 'active' : '' ?>">
+                    <div class="faq-title" onclick="toggleFaq(this)">
+                        Về KIPEEDA <span>+</span>
+                    </div>
+                    <ul class="faq-list" style="<?= in_array($type, ['gioithieu', 'tuyendung', 'lienhe']) ? 'display:block' : '' ?>">
+                        <li><a href="faq.php?type=gioithieu" class="<?= $type == 'gioithieu' ? 'active' : '' ?>">Giới thiệu</a></li>
+                        <li><a href="faq.php?type=tuyendung" class="<?= $type == 'tuyendung' ? 'active' : '' ?>">Tuyển dụng</a></li>
+                        <li><a href="faq.php?type=lienhe" class="<?= $type == 'lienhe' ? 'active' : '' ?>">Liên hệ</a></li>
+                    </ul>
+                </div>
 
-                <li>
-                    <a href="faq.php?type=lienhe" class="<?= $type == 'lienhe' ? 'active' : '' ?>">
-                        Liên hệ
-                    </a>
-                </li>
-            </ul>
+                <div class="faq-item <?= in_array($type, ['baohanh', 'giaohang', 'baomat', 'tragop']) ? 'active' : '' ?>">
+                    <div class="faq-title" onclick="toggleFaq(this)">
+                        Chính sách <span>+</span>
+                    </div>
+                    <ul class="faq-list" style="<?= in_array($type, ['baohanh', 'giaohang', 'baomat', 'tragop']) ? 'display:block' : '' ?>">
+                        <li><a href="faq.php?type=baohanh" class="<?= $type == 'baohanh' ? 'active' : '' ?>">Bảo hành</a></li>
+                        <li><a href="faq.php?type=giaohang" class="<?= $type == 'giaohang' ? 'active' : '' ?>">Giao hàng</a></li>
+                        <li><a href="faq.php?type=baomat" class="<?= $type == 'baomat' ? 'active' : '' ?>">Bảo mật</a></li>
+                        <li><a href="faq.php?type=tragop" class="<?= $type == 'tragop' ? 'active' : '' ?>">Trả góp</a></li>
+                    </ul>
+                </div>
+                <div class="faq-item <?= in_array($type, ['cuahang', 'muahang', 'thanhtoan', 'tragop_hd', 'baohanh_hd', 'buildpc']) ? 'active' : '' ?>">
+                    <div class="faq-title" onclick="toggleFaq(this)">
+                        Thông tin <span>+</span>
+                    </div>
 
-            <!-- CHÍNH SÁCH -->
-            <h5 class="mt-3">Chính sách</h5>
-            <ul>
-                <li>
-                    <a href="faq.php?type=baohanh" class="<?= $type == 'baohanh' ? 'active' : '' ?>">
-                        Chính sách bảo hành
-                    </a>
-                </li>
+                    <ul class="faq-list" style="<?= in_array($type, ['cuahang', 'muahang', 'thanhtoan', 'tragop_hd', 'baohanh_hd', 'buildpc']) ? 'display:block' : '' ?>">
 
-                <li>
-                    <a href="faq.php?type=giaohang" class="<?= $type == 'giaohang' ? 'active' : '' ?>">
-                        Chính sách giao hàng
-                    </a>
-                </li>
+                        <li>
+                            <a href="faq.php?type=cuahang" class="<?= $type == 'cuahang' ? 'active' : '' ?>">
+                                Hệ thống cửa hàng
+                            </a>
+                        </li>
 
-                <li>
-                    <a href="faq.php?type=baomat" class="<?= $type == 'baomat' ? 'active' : '' ?>">
-                        Chính sách bảo mật
-                    </a>
-                </li>
+                        <li>
+                            <a href="faq.php?type=muahang" class="<?= $type == 'muahang' ? 'active' : '' ?>">
+                                Hướng dẫn mua hàng
+                            </a>
+                        </li>
 
-                <li>
-                    <a href="faq.php?type=tragop" class="<?= $type == 'tragop' ? 'active' : '' ?>">
-                        Chính sách trả góp
-                    </a>
-                </li>
-            </ul>
+                        <li>
+                            <a href="faq.php?type=thanhtoan" class="<?= $type == 'thanhtoan' ? 'active' : '' ?>">
+                                Hướng dẫn thanh toán
+                            </a>
+                        </li>
 
-            <!-- THÔNG TIN -->
-            <h5 class="mt-3">Thông tin</h5>
-            <ul>
-                <li>
-                    <a href="faq.php?type=cuahang" class="<?= $type == 'cuahang' ? 'active' : '' ?>">
-                        Hệ thống cửa hàng
-                    </a>
-                </li>
+                        <li>
+                            <a href="faq.php?type=tragop_hd" class="<?= $type == 'tragop_hd' ? 'active' : '' ?>">
+                                Hướng dẫn trả góp
+                            </a>
+                        </li>
 
-                <li>
-                    <a href="faq.php?type=muahang" class="<?= $type == 'muahang' ? 'active' : '' ?>">
-                        Hướng dẫn mua hàng
-                    </a>
-                </li>
+                        <li>
+                            <a href="faq.php?type=baohanh_hd" class="<?= $type == 'baohanh_hd' ? 'active' : '' ?>">
+                                Hướng dẫn bảo hành
+                            </a>
+                        </li>
 
-                <li>
-                    <a href="faq.php?type=thanhtoan" class="<?= $type == 'thanhtoan' ? 'active' : '' ?>">
-                        Hướng dẫn thanh toán
-                    </a>
-                </li>
+                        <li>
+                            <a href="faq.php?type=buildpc" class="<?= $type == 'buildpc' ? 'active' : '' ?>">
+                                Build PC
+                            </a>
+                        </li>
 
-                <li>
-                    <a href="faq.php?type=tragop_hd" class="<?= $type == 'tragop_hd' ? 'active' : '' ?>">
-                        Hướng dẫn trả góp
-                    </a>
-                </li>
+                    </ul>
+                </div>
 
-                <li>
-                    <a href="faq.php?type=baohanh_hd" class="<?= $type == 'baohanh_hd' ? 'active' : '' ?>">
-                        Hướng dẫn bảo hành
-                    </a>
-                </li>
+            </div>
 
-                <li>
-                    <a href="faq.php?type=buildpc" class="<?= $type == 'buildpc' ? 'active' : '' ?>">
-                        Build PC
-                    </a>
-                </li>
-            </ul>
+            <!-- DESKTOP -->
+            <div class="faq-desktop d-none d-md-block">
+
+                <h5>Về KIPEEDA</h5>
+                <ul>
+                    <li><a href="faq.php?type=gioithieu" class="<?= $type == 'gioithieu' ? 'active' : '' ?>">Giới thiệu</a></li>
+                    <li><a href="faq.php?type=tuyendung" class="<?= $type == 'tuyendung' ? 'active' : '' ?>">Tuyển dụng</a></li>
+                    <li><a href="faq.php?type=lienhe" class="<?= $type == 'lienhe' ? 'active' : '' ?>">Liên hệ</a></li>
+                </ul>
+
+                <h5 class="mt-3">Chính sách</h5>
+                <ul>
+                    <li><a href="faq.php?type=baohanh" class="<?= $type == 'baohanh' ? 'active' : '' ?>">Bảo hành</a></li>
+                    <li><a href="faq.php?type=giaohang" class="<?= $type == 'giaohang' ? 'active' : '' ?>">Giao hàng</a></li>
+                    <li><a href="faq.php?type=baomat" class="<?= $type == 'baomat' ? 'active' : '' ?>">Bảo mật</a></li>
+                    <li><a href="faq.php?type=tragop" class="<?= $type == 'tragop' ? 'active' : '' ?>">Trả góp</a></li>
+                </ul>
+
+                <h5 class="mt-3">Thông tin</h5>
+                <ul>
+                    <li><a href="faq.php?type=cuahang" class="<?= $type == 'cuahang' ? 'active' : '' ?>">Cửa hàng</a></li>
+                    <li><a href="faq.php?type=muahang" class="<?= $type == 'muahang' ? 'active' : '' ?>">Mua hàng</a></li>
+                    <li><a href="faq.php?type=thanhtoan" class="<?= $type == 'thanhtoan' ? 'active' : '' ?>">Thanh toán</a></li>
+                    <li><a href="faq.php?type=buildpc" class="<?= $type == 'buildpc' ? 'active' : '' ?>">Build PC</a></li>
+                </ul>
+
+            </div>
 
         </div>
+
+
+
+
         <!-- CONTENT -->
         <div class="faq-content">
 
@@ -685,6 +698,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="public/js/footer.js"></script>
+    <script src="public/js/faq.js"></script>
 </body>
 
 </html>

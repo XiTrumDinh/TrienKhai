@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th3 29, 2026 lúc 08:14 PM
+-- Thời gian đã tạo: Th3 29, 2026 lúc 08:49 PM
 -- Phiên bản máy phục vụ: 8.4.7
 -- Phiên bản PHP: 8.3.28
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Cơ sở dữ liệu: `kipeeda`
 --
+CREATE DATABASE IF NOT EXISTS `kipeeda` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `kipeeda`;
 
 -- --------------------------------------------------------
 
@@ -27,7 +29,6 @@ SET time_zone = "+00:00";
 -- Cấu trúc bảng cho bảng `categories`
 --
 
-DROP TABLE IF EXISTS `categories`;
 CREATE TABLE IF NOT EXISTS `categories` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
@@ -58,7 +59,6 @@ INSERT INTO `categories` (`id`, `name`, `image`) VALUES
 -- Cấu trúc bảng cho bảng `products`
 --
 
-DROP TABLE IF EXISTS `products`;
 CREATE TABLE IF NOT EXISTS `products` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(500) COLLATE utf8mb4_general_ci NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   `flash_sale` tinyint DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `fk_categories_product` (`category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=97 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `products`
@@ -123,7 +123,7 @@ INSERT INTO `products` (`id`, `name`, `price`, `old_price`, `image`, `descriptio
 (86, 'DTA', 3, 2, '1', '2', '3', 1, '2026-03-29 15:47:15', 1, 0),
 (87, 'DTA', 4, 3, 'hinh\\hinh1.jpg', '2', '1', 1, '2026-03-29 15:49:45', 1, 0),
 (88, 'DTA', 4, 3, 'hinh\\hinh1.jpg', '2', '2', 1, '2026-03-29 15:54:14', 1, 0),
-(94, 'DTA', 12, 1, '', '2', '4', 10, '2026-03-29 18:22:38', 1, 0);
+(96, 'Sou', 4, 5, '', '3', '2', 2, '2026-03-29 20:46:23', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -131,7 +131,6 @@ INSERT INTO `products` (`id`, `name`, `price`, `old_price`, `image`, `descriptio
 -- Cấu trúc bảng cho bảng `product_specs`
 --
 
-DROP TABLE IF EXISTS `product_specs`;
 CREATE TABLE IF NOT EXISTS `product_specs` (
   `id` int NOT NULL AUTO_INCREMENT,
   `product_id` int NOT NULL,
@@ -327,7 +326,6 @@ INSERT INTO `product_specs` (`id`, `product_id`, `spec_name`, `spec_value`) VALU
 -- Cấu trúc bảng cho bảng `users`
 --
 
-DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,

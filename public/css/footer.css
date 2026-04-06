@@ -77,6 +77,13 @@ footer {
         padding-bottom: 10px;
     }
 
+    .footer-title span {
+        transition: 0.3s;
+    }
+
+    .footer-item.active span {
+        transform: rotate(45deg);
+    }
 }
 
 .footer-content svg {

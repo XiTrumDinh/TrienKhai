@@ -1,17 +1,13 @@
 
 document.querySelectorAll(".footer-title").forEach(title => {
-
     title.addEventListener("click", () => {
 
-        if (window.innerWidth <= 768) {
+        const parent = title.parentElement;
+        const content = parent.querySelector(".footer-content");
 
-            let content = title.nextElementSibling
+        parent.classList.toggle("active");
 
-            content.style.display =
-                content.style.display === "block" ? "none" : "block"
-
-        }
-
-    })
-
-})
+        content.style.display =
+            content.style.display === "block" ? "none" : "block";
+    });
+});

@@ -93,7 +93,7 @@ $keyword = $_GET["keyword"] ?? "";
                     <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === "admin"): ?>
                         <a href="crud.php" class="btn btn-light">CRUD</a>
                     <?php endif; ?>
-                    <button class="btn btn-light">Tra cứu đơn hàng</button>
+                    <a href="shipping.php"><button class="btn btn-light">Đơn mua</button></a>
                     <a href="cart.php" class="btn btn-light">Giỏ hàng</a>
 
                     <?php if (isset($_SESSION["user"])): ?>

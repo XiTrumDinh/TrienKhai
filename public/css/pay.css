@@ -1,0 +1,145 @@
+.address {
+    margin: 10px 0;
+    padding-bottom: 12px;
+    border-bottom: 3px solid #000;
+}
+
+.info {
+    margin: 10px 0;
+    padding-bottom: 12px;
+    border-bottom: 3px solid black;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0;
+}
+
+.row h5 {
+    min-width: 90px;
+}
+
+.row input {
+    flex: 1;
+    padding: 8px;
+}
+
+.option {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.option-box {
+    flex: 1;
+    border: 2px solid #ddd;
+    padding: 15px;
+    cursor: pointer;
+    position: relative;
+}
+
+/* ẩn radio */
+.option-box input {
+    position: absolute;
+    opacity: 0;
+}
+
+/* màu từng cái */
+.ship {
+    background: #f0f8ff;
+}
+
+.express {
+    background: #fff5f5;
+}
+
+.cod {
+    background: #f5fff5;
+}
+
+.online {
+    background: #f9f5ff;
+}
+
+/* khi chọn */
+.option-box:has(input:checked) {
+    border-color: black;
+    transform: scale(1.02);
+}
+
+.payment {
+    margin: 10px 0;
+    padding-bottom: 12px;
+    border-bottom: 3px solid black;
+}
+
+.endpay {
+    margin-top: 20px;
+    margin: 10px 0;
+    padding-bottom: 12px;
+}
+
+.summary {
+    background: #ffe5e5;
+    padding: 20px;
+    display: flex;
+    justify-content: flex-end;
+    /* đẩy nội dung sang phải */
+}
+
+.summary-content {
+    text-align: right;
+}
+
+.order-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: #ffcc00;
+    border: none;
+    cursor: pointer;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+
+    .option {
+        flex-direction: column;
+    }
+
+    .row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .row input {
+        width: 100%;
+    }
+
+    .summary {
+        justify-content: flex-start;
+    }
+
+    .summary-content {
+        text-align: left;
+        width: 100%;
+    }
+
+    .order-btn {
+        width: 100%;
+    }
+
+    .option-box {
+        padding: 12px;
+    }
+
+    h5 {
+        font-size: 14px;
+    }
+
+    h6 {
+        font-size: 13px;
+    }
+
+}

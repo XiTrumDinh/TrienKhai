@@ -213,9 +213,22 @@ $similar = $db->select(
                     </table>
                 </div>
 
-
-                <div class="p-3 border rounded mt-3">
+                    <!--Đánh giá-->
+                <div id="review" class="p-3 border rounded mt-3">
                     <h4>Đánh giá người dùng</h4>
+
+                    <div id="review-form" style="display:none;">
+                        <p><strong>Người dùng:</strong> Nguyễn Văn A</p>
+
+                        <div class="rating-star">
+                            ⭐ ⭐ ⭐ ⭐ ⭐
+                        </div>
+
+                        <textarea class="form-control my-2"
+                            placeholder="Nhập đánh giá của bạn..."></textarea>
+
+                        <button class="btn btn-danger">Gửi đánh giá</button>
+                    </div>
                 </div>
 
             </div>

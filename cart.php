@@ -135,7 +135,7 @@ $result = $db->conn->query($sql);
                 </div>
             </div>
 
-            <button class="order-btn">Đặt hàng</button>
+           <a href="pay.php"> <button class="order-btn">Đặt hàng</button></a>
         </div>
     </div>
     <?php include "footer.php" ?>

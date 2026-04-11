@@ -71,7 +71,7 @@ $keyword = $_GET["keyword"] ?? "";
 
                 <form action="view.php" method="GET" class="flex-grow-1 mx-3">
                     <div class="input-group">
-
+                                
                         <input
                             type="search"
                             name="keyword"

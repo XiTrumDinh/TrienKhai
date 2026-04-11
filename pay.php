@@ -1,92 +1,179 @@
+<?php
+session_start();
+include_once "Database/Database.php";
+
+$db = new Database();
+$conn = $db->conn;
+
+// ❌ chưa login
+if (!isset($_SESSION['user'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// ❌ giỏ rỗng
+if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
+    header("Location: cart.php");
+    exit();
+}
+
+
+$name = $_POST['name'] ?? '';
+$phone = $_POST['phone'] ?? '';
+$email = $_POST['email'] ?? '';
+$address = $_POST['address'] ?? '';
+$note = $_POST['note'] ?? '';
+
+
+$total = 0;
+$totalQty = 0;
+
+foreach ($_SESSION['cart'] as $id => $qty) {
+    $id = (int)$id;
+    $qty = (int)$qty;
+
+    $result = $conn->query("SELECT * FROM products WHERE id = $id");
+
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $total += $row['price'] * $qty;
+        $totalQty += $qty;
+    }
+}
+
+$discount = $_SESSION['discount'] ?? 0;
+$final = $total - $discount;
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Giỏ hàng</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="public/css/index.css">
+    <link rel="stylesheet" href="public/css/info.css">
     <link rel="stylesheet" href="public/css/style.css">
-    <link rel="stylesheet" href="public/css/pay.css">
 </head>
 
 <body>
-    <?php include_once "navbar.php"; ?>
-    <div class="container">
 
-        <!-- Address -->
-        <h5 class="address">
-            Địa Chỉ:Linh Xuân,Thủ Đức
-        </h5>
+    <?php include "navbar.php"; ?>
+<div class="cart-container">
+    <div class="cart-box">
 
-        <div class="info">
-            <h5>Sản phẩm:Laptop HP Pavilion 15</h5>
-
-            <div class="row">
-                <h5>Lời nhắn:</h5>
-                <input type="text" placeholder="Nhập lời nhắn...">
-            </div>
-
-            <div class="row">
-                <h5>Voucher:</h5>
-                <input type="text" placeholder="Nhập mã voucher...">
-            </div>
+        <!-- STEPS -->
+        <div class="cart-steps">
+            <div class="step"><div class="icon">🛒</div><div class="label">Giỏ hàng</div></div>
+            <div class="step"><div class="icon">👤</div><div class="label">Thông tin</div></div>
+            <div class="step active"><div class="icon">💳</div><div class="label">Thanh toán</div></div>
+            <div class="step"><div class="icon">✔️</div><div class="label">Hoàn tất</div></div>
         </div>
 
-        <div class="payment">
+        <div class="info-container">
 
-            <h5>Phương thức vận chuyển</h5>
-            <div class="option">
+            <!-- LEFT -->
+            <div class="info-form">
+                <h5>Thông tin thanh toán</h5>
 
-                <label class="option-box ship">
-                    <input type="radio" name="shipping">
-                    <strong>Giao hàng nhanh</strong>
-                    <p>2 - 3 ngày</p>
-                    <span>20.000đ</span>
-                </label>
+                <form action="Controller/process_oder.php" method="POST">
 
-                <label class="option-box express">
-                    <input type="radio" name="shipping">
-                    <strong>Ship hỏa tốc</strong>
-                    <p>Trong ngày</p>
-                    <span>50.000đ</span>
-                </label>
+                    <!-- 🔥 HIỂN THỊ LẠI THÔNG TIN -->
+                    <div class="mb-3">
+                        <b>Họ tên:</b> <?= htmlspecialchars($name) ?>
+                    </div>
 
+                    <div class="mb-3">
+                        <b>SĐT:</b> <?= htmlspecialchars($phone) ?>
+                    </div>
+
+                    <div class="mb-3">
+                        <b>Địa chỉ:</b> <?= htmlspecialchars($address) ?>
+                    </div>
+
+                    <div class="mb-3">
+                        <b>Email:</b> <?= htmlspecialchars($email) ?>
+                    </div>
+
+                    <?php if (!empty($note)): ?>
+                        <div class="mb-3">
+                            <b>Ghi chú:</b> <?= htmlspecialchars($note) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <hr>
+
+                    <!-- 💳 CHỌN THANH TOÁN -->
+                    <h6>Phương thức thanh toán</h6>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="payment" value="cod" checked>
+                        <label class="form-check-label">
+                            Thanh toán khi nhận hàng (COD)
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="payment" value="bank">
+                        <label class="form-check-label">
+                            Chuyển khoản ngân hàng
+                        </label>
+                    </div>
+
+                    <!-- 🔥 GIỮ DATA -->
+                    <input type="hidden" name="name" value="<?= htmlspecialchars($name) ?>">
+                    <input type="hidden" name="phone" value="<?= htmlspecialchars($phone) ?>">
+                    <input type="hidden" name="email" value="<?= htmlspecialchars($email) ?>">
+                    <input type="hidden" name="address" value="<?= htmlspecialchars($address) ?>">
+                    <input type="hidden" name="note" value="<?= htmlspecialchars($note) ?>">
+
+                    <button class="order-btn">Xác nhận thanh toán</button>
+                </form>
             </div>
 
-            <h5>Phương thức thanh toán</h5>
-            <div class="option">
+            <!-- RIGHT -->
+            <div class="info-money">
+                <h5>Tóm tắt đơn hàng</h5>
+                <div class="summary-box">
 
-                <label class="option-box cod">
-                    <input type="radio" name="payment">
-                    <strong>Thanh toán khi nhận hàng</strong>
-                    <p>Trả tiền mặt khi shipper giao</p>
-                </label>
+                    <div class="summary-row">
+                        <span>Tổng sản phẩm</span>
+                        <span><?= $totalQty ?></span>
+                    </div>
 
-                <label class="option-box online">
-                    <input type="radio" name="payment">
-                    <strong>Thanh toán online</strong>
-                    <p>Ví điện tử / chuyển khoản</p>
-                </label>
-            </div>
-        </div>
-        <div class="endpay">
-            <h5>Chi Tiết thanh toán:</h5>
+                    <div class="summary-row">
+                        <span>Tổng tiền</span>
+                        <span><?= number_format($total) ?>₫</span>
+                    </div>
 
-            <div class="summary">
-                <div class="summary-content">
-                    <h6>Sản phẩm: Laptop HP Pavilion 15</h6>
-                    <h6>Số tiền: 18.990.000đ</h6>
+                    <?php if ($discount > 0): ?>
+                        <div class="summary-row" style="color:green;">
+                            <span>Giảm giá</span>
+                            <span>-<?= number_format($discount) ?>₫</span>
+                        </div>
+                    <?php endif; ?>
 
-                    <a href="shipping.php"><button class="order-btn">Đặt hàng</button></a>
+                    <div class="summary-row total">
+                        <span>Thanh toán</span>
+                        <span style="color:red;">
+                            <?= number_format($final) ?>₫
+                        </span>
+                    </div>
+
                 </div>
             </div>
+
         </div>
+
     </div>
-    <?php include "footer.php" ?>
+</div>
+
+    <?php include "footer.php"; ?>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="public\js\footer.js"></script>
+    <script src="public/js/footer.js"></script>
+
 </body>
 
 </html>

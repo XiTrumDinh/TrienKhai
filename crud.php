@@ -255,7 +255,7 @@ $products = $db->select($sql, $selectTypes, $selectParams);
                 <ul class="list-unstyled">
                     <li><a href="user.php">User</a></li>
                     <li><a href="crud.php" class="active">Product</a></li>
-                    <li>.....</li>
+                    <li><a href="order.php">Order</a></li>
                     <li>.....</li>
                 </ul>
 

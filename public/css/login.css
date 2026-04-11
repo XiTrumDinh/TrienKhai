@@ -4,7 +4,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 60px 15px; /* thêm padding ngang cho mobile */
+    padding: 60px 15px;
+    /* thêm padding ngang cho mobile */
     min-height: 80vh;
 }
 
@@ -79,6 +80,36 @@
 /* checkbox */
 .form-check-label {
     font-size: 14px;
+}
+
+.info-container {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    /* QUAN TRỌNG */
+}
+
+.info-form {
+    flex: 2;
+}
+
+.info-money {
+    flex: 1;
+    position: sticky;
+    top: 20px;
+    /* cho nó dính đẹp khi scroll */
+}
+
+.login-card .form-control {
+    width: 100%;
+    height: 48px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+
+textarea.form-control {
+    height: 120px;
 }
 
 /* ===== RESPONSIVE ===== */

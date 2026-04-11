@@ -167,7 +167,7 @@ $users = $db->select($sql, $types, $params);
                 <ul class="list-unstyled">
                     <li><a href="user.php" class="active">User</a></li>
                     <li><a href="crud.php">Product</a></li>
-                    <li>.....</li>
+                    <li><a href="order.php">Order</a></li>
                     <li>.....</li>
                 </ul>
 

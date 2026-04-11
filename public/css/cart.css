@@ -207,6 +207,16 @@
 
 .summary-row {
     display: flex;
+    justify-content: space-between;
+    /* đẩy 2 bên */
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.summary-row span:last-child {
+    text-align: right;
+    min-width: 180px;
+    /* giữ cột tiền thẳng hàng */
 }
 
 .summary-row span {
@@ -388,6 +398,7 @@
         padding: 12px;
     }
 }
+
 .price_old {
     text-decoration: line-through;
     color: #888;

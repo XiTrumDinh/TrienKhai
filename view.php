@@ -69,6 +69,7 @@ $banner = $db->select("SELECT image FROM categories LIMIT 1")[0]['image'];
 
     <!-- Navbar -->
     <?php include_once "navbar.php"; ?>
+    <br>
     <div class="container">
         <div class="banner">
             <img src="public/img/banner1.jpg" alt="Banner">

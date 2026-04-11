@@ -1,52 +1,93 @@
-    .search-box{
+    .search-box {
         position: relative;
         max-width: 600px;
     }
 
-    .search-box input{
+    .search-box input {
         width: 100%;
         border-radius: 5px;
     }
 
-    .search-icon{
+    .search-icon {
         position: absolute;
         right: 15px;
         top: 50%;
         transform: translateY(-50%);
-        
-    }
-    .navbar-content{
-    display:flex;
-    align-items:center;
-    gap:30px;
+
     }
 
-    .feature-bar{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    position:relative;
+    .navbar-content {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .feature-bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        position: relative;
     }
 
 
 
-    .feature-bar svg{
-    width:18px;
-    height:18px;
-    fill:#333;
-    display:block;
-    }
-    .feature-bar{
-    display:flex;
-    align-items:center;
-    gap:6px;
+    .feature-bar svg {
+        width: 18px;
+        height: 18px;
+        fill: #333;
+        display: block;
     }
 
-    .feature-bar p{
-    margin:0;
+    .feature-bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
-    @media (max-width:768px){
-    .navbar-content{
-    display:none;
+
+    .feature-bar p {
+        margin: 0;
     }
+
+    .dropdown-menu {
+        border: none !important;
+        border-radius: 8px !important;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        /* Đổ bóng giống hình 2 */
+        margin-top: 5px !important;
+        /* Khoảng cách nhỏ với nút bấm */
+        min-width: 220px;
+        padding: 8px 0;
+    }
+
+    .dropdown-item {
+        padding: 10px 20px;
+        font-size: 14px;
+        color: #333;
+        border-bottom: 1px solid #f8f9fa;
+        /* Đường kẻ mờ giữa các mục */
+    }
+
+    .dropdown-item:hover {
+        background-color: #f1f1f1;
+        color: #dc3545;
+        /* Đổi màu chữ khi hover cho nổi bật */
+    }
+
+    /* Quan trọng: Sửa lỗi Media Query */
+    @media (max-width: 768px) {
+
+        /* Cho phép nội dung hiện ra thay vì display: none */
+        .navbar-content {
+            display: flex !important;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Đảm bảo menu luôn nằm trên cùng (z-index) */
+        .dropdown-menu {
+            z-index: 9999 !important;
+            position: absolute !important;
+            /* Không cho nó tràn toàn màn hình */
+        }
     }

@@ -1,3 +1,4 @@
+
 .sidebar {
     background: #f1f1f1;
     min-height: 80vh;
@@ -136,4 +137,8 @@ th:hover {
     .main-content {
         padding: 10px;
     }
+}
+th a {
+    color: black !important;
+    text-decoration: none;
 }

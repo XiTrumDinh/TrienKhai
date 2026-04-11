@@ -32,24 +32,23 @@ $keyword = $_GET["keyword"] ?? "";
             <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3 w-100">
 
                 <?php if ($isIndex): ?>
+                    <div class="dropdown">
+                        <button type="button" class="btn btn-light dropdown-toggle" id="btnCategory">
+                            ☰ Danh mục
+                        </button>
 
-                    <button type="button" class="btn btn-light" id="btnCategory">
-                        ☰ Danh mục
-                    </button>
-
-                    <div class="menu dropdown-menu" id="navMenu">
-                        <ul>
+                        <ul class="dropdown-menu shadow" id="navMenu">
                             <?php foreach ($categories as $c): ?>
                                 <li>
-                                    <a href="view.php?category=<?= $c['id'] ?>">
+                                    <a class="dropdown-item" href="view.php?category=<?= $c['id'] ?>">
                                         <?= $c['name'] ?>
                                     </a>
                                 </li>
                             <?php endforeach ?>
                         </ul>
                     </div>
-
                 <?php else: ?>
+
 
                     <div class="dropdown">
                         <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">

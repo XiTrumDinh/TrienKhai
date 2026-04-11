@@ -1,14 +1,15 @@
 .home-banner {
     display: grid;
     grid-template-columns: 220px 1fr 1fr 1fr;
-    grid-template-rows: 170px 170px 150px;
     gap: 15px;
     padding: 20px;
     background: #cfcfcfda;
 }
 
 /* MENU */
-
+.hidden-item {
+    display: none;
+}
 
 .menu {
     grid-row: 1 / span 3;
@@ -16,6 +17,11 @@
     background: white;
     border-radius: 10px;
     padding: 10px;
+
+}
+
+.menu.show-all .hidden-item {
+    display: block;
 }
 
 .menu ul {
@@ -28,23 +34,35 @@
     padding: 12px;
     border-bottom: 1px solid #eee;
     cursor: pointer;
+
+
 }
 
-.menu ul li:hover a{
-color: #d70018;
+.menu.show {
+    transform: translateX(0);
 }
-.menu ul li a{
-text-decoration: none;
-color: #333;
-display: block;
+
+.menu ul li:hover a {
+    color: #d70018;
 }
+
+.menu ul li a {
+    text-decoration: none;
+    color: #333;
+    display: block;
+}
+
 /* BANNER */
+
+.banner {
+    overflow: hidden;
+    border-radius: 10px;
+}
 
 .banner img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 5px;
 }
 
 /* VỊ TRÍ */
@@ -104,6 +122,10 @@ display: block;
         display: none;
     }
 
+    .menu.show {
+        display: block;
+    }
+
     .home-banner {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
@@ -138,6 +160,7 @@ display: block;
     background: red;
     padding: 20px;
     border-radius: 10px;
+
 }
 
 /* TITLE */
@@ -308,23 +331,24 @@ display: block;
 
 /*Danh sach san pham*/
 .product-list {
-    display: grid;
-
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-
+    display: flex;
+    flex-wrap: wrap;
+    /* Cho phép xuống dòng */
+    justify-content: center;
+    /* Căn giữa tất cả các thẻ trong hàng */
     gap: 20px;
     margin-top: 15px;
 }
 
-/*Card san pham*/
 .product-item {
+    width: 220px;
+    /* Cố định chiều rộng thẻ thay vì dùng minmax của grid */
     background: white;
-
     border: 1px solid #ccc;
-
-    padding: 5px;
-
+    padding: 10px;
     transition: 0.2s;
+    display: flex;
+    flex-direction: column;
 }
 
 .product-item:hover {
@@ -420,17 +444,19 @@ display: block;
     background: red;
     color: white;
 }
-.product-link{
-text-decoration: none;
-color: inherit;
-display: block;
-}
-.menu li.active{
-background:#ffecec;
-border-left:4px solid #e30019;
+
+.product-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 
-.menu li.active a{
-color:#e30019;
-font-weight:bold;
+.menu li.active {
+    background: #ffecec;
+    border-left: 4px solid #e30019;
+}
+
+.menu li.active a {
+    color: #e30019;
+    font-weight: bold;
 }

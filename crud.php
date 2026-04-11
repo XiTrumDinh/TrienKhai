@@ -375,10 +375,10 @@ $products = $db->select($sql, $selectTypes, $selectParams);
                                         <img src="public/img/<?= $item['image'] ?>" alt="ảnh" width="60">
                                     </td>
                                     <td>
-                                        <input type="checkbox" <?= $item['flash_sale'] ? 'checked' : '' ?>>
+                                        <input type="checkbox" disabled <?= $item['flash_sale'] ? 'checked' : '' ?>>
                                     </td>
                                     <td>
-                                        <input type="checkbox" <?= $item['status'] ? 'checked' : '' ?>>
+                                        <input type="checkbox" disabled <?= $item['status'] ? 'checked' : '' ?>>
                                     </td>
                                     <td>
 

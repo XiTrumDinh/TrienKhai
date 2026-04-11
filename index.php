@@ -77,18 +77,17 @@ LIMIT 4"
 
                     <?php foreach ($categories as $c): ?>
 
-                        <li class="<?= ($category == $c['id']) ? 'active' : '' ?>">
-
+                        <li class="
+        <?= ($category == $c['id']) ? 'active' : '' ?>
+        <?= ($c['id'] >= 11) ? 'hidden-item' : '' ?>
+    ">
                             <a href="view.php?category=<?= $c['id'] ?>">
-
                                 <?= $c['name'] ?>
-
                             </a>
-
                         </li>
 
                     <?php endforeach ?>
-                        
+
                 </ul>
             </div>
 

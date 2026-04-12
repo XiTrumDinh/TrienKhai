@@ -105,3 +105,18 @@
 html {
     scroll-behavior: smooth;
 }
+.review-item {
+    font-size: 14px;
+}
+
+.review-item b {
+    color: #333;
+}
+
+.review-item p {
+    margin: 4px 0;
+}
+
+.review-item small {
+    font-size: 12px;
+}

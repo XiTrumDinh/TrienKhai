@@ -1,52 +1,92 @@
 <?php
 require_once "Database/Database.php";
+
 $category = $_GET['category'] ?? null;
 $page = $_GET['page'] ?? 1;
+
 $db = new Database();
 
+/* ===== PAGINATION ===== */
 $limit = 10;
+$page = (int) $page;
+if ($page < 1)
+    $page = 1;
 
-$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-$currentPage = $page;
 $offset = ($page - 1) * $limit;
-/* Lấy danh mục mới nhất */
-$categories = $db->select("SELECT * FROM categories");
-/* Lấy sản phẩm mới nhất */
-if ($category) {
 
-    $products = $db->select(
-        "SELECT * FROM products
-WHERE category_id = ?
-AND flash_sale = 0
-ORDER BY created_at DESC
-LIMIT $offset, $limit",
+/* ===== DANH MỤC ===== */
+$categories = $db->select("SELECT * FROM categories");
+
+/* ===== SẢN PHẨM (CÓ RATING) ===== */
+$sql = "
+SELECT 
+    p.*,
+    AVG(r.rating) AS avg_rating,
+    COUNT(r.id) AS total_review
+FROM products p
+LEFT JOIN reviews r ON p.id = r.product_id
+WHERE p.flash_sale = '0'
+AND p.status = '0'
+";
+
+$params = [];
+$types = "";
+
+/* ===== FILTER CATEGORY ===== */
+if ($category) {
+    $sql .= " AND p.category_id = ?";
+    $params[] = $category;
+    $types .= "i";
+}
+
+/* ===== GROUP + ORDER + LIMIT ===== */
+$sql .= "
+GROUP BY p.id 
+ORDER BY p.created_at DESC 
+LIMIT ?, ?
+";
+
+/* thêm limit vào bind */
+$params[] = $offset;
+$params[] = $limit;
+$types .= "ii";
+
+$products = $db->select($sql, $types, $params);
+
+/* ===== TOTAL PRODUCT ===== */
+if ($category) {
+    $total = $db->count(
+        "SELECT COUNT(*) FROM products 
+         WHERE category_id = ? 
+         AND flash_sale = '0' 
+         AND status = '0'",
         "i",
         [$category]
     );
 } else {
-
-    $products = $db->select(
-        "SELECT * FROM products
-WHERE flash_sale = 0
-ORDER BY created_at DESC
-LIMIT $offset, $limit"
+    $total = $db->count(
+        "SELECT COUNT(*) FROM products 
+         WHERE flash_sale = '0' 
+         AND status = '0'"
     );
 }
 
-/* tổng sản phẩm */
-if ($category) {
-    $total = $db->count("SELECT COUNT(*) FROM products WHERE category_id=$category AND flash_sale=0");
-} else {
-    $total = $db->count("SELECT COUNT(*) FROM products WHERE flash_sale=0");
-}
-
-/* tổng trang */
 $totalPage = ceil($total / $limit);
-$flash = $db->select(
-    "SELECT * FROM products 
-WHERE flash_sale = 1 
-LIMIT 4"
-);
+
+/* ===== FLASH SALE (CÓ RATING) ===== */
+$flash = $db->select("
+SELECT 
+    p.*,
+    AVG(r.rating) AS avg_rating,
+    COUNT(r.id) AS total_review
+FROM products p
+LEFT JOIN reviews r ON p.id = r.product_id
+WHERE p.flash_sale = '1'
+AND p.status = '0'
+GROUP BY p.id
+ORDER BY p.created_at DESC
+LIMIT 4
+");
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -79,7 +119,7 @@ LIMIT 4"
 
                         <li class="
         <?= ($category == $c['id']) ? 'active' : '' ?>
-        <?= ($c['id'] >= 11) ? 'hidden-item' : '' ?>
+       
     ">
                             <a href="view.php?category=<?= $c['id'] ?>">
                                 <?= $c['name'] ?>
@@ -87,7 +127,7 @@ LIMIT 4"
                         </li>
 
                     <?php endforeach ?>
-                        
+
                 </ul>
             </div>
 
@@ -147,12 +187,12 @@ LIMIT 4"
 
                     <p class="mt-5"><?= $f['name'] ?></p>
 
-                    <div class="old"><?= number_format($f['price'], 0, ',', '.') ?> đ</div>
+                    <div class="old"><?= number_format($f['old_price'], 0, ',', '.') ?> đ</div>
 
                     <div class="price-row">
 
                         <span class="new">
-                            <?= number_format($f['old_price'], 0, ',', '.') ?> đ
+                            <?= number_format($f['price'], 0, ',', '.') ?> đ
                         </span>
 
                         <?php
@@ -163,8 +203,17 @@ LIMIT 4"
 
                     </div>
 
+                    <?php
+                    $avg = $f['avg_rating'] ? round($f['avg_rating'], 1) : 0;
+                    $count = $f['total_review'] ?? 0;
+                    $full = floor($avg);
+                    ?>
+
                     <div class="rating">
-                        ⭐ 0.0 (0 đánh giá)
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <?= ($i <= $full) ? "⭐" : "☆" ?>
+                        <?php endfor; ?>
+                        <span><?= $avg ?> (<?= $count ?>)</span>
                     </div>
 
                     <button>MUA NGAY</button>
@@ -175,7 +224,7 @@ LIMIT 4"
             <script>
                 document.querySelectorAll(".product-card").forEach(card => {
 
-                    card.addEventListener("click", function() {
+                    card.addEventListener("click", function () {
 
                         let id = this.dataset.id
 
@@ -186,7 +235,9 @@ LIMIT 4"
                 })
             </script>
             <div class="flash-more">
-                Xem thêm ưu đãi
+                <a href="view.php?flash=1" class="flash-more">
+                    Xem thêm ưu đãi
+                </a>
             </div>
 
 
@@ -244,8 +295,18 @@ LIMIT 4"
 
                     </div>
 
+                    <?php
+                    $avg = $p['avg_rating'] ? round($p['avg_rating'], 1) : 0;
+                    $count = $p['total_review'] ?? 0;
+                    $full = floor($avg);
+                    ?>
+
                     <div class="rating">
-                        ⭐ 0.0 (0 đánh giá)
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <?= ($i <= $full) ? "⭐" : "☆" ?>
+                        <?php endfor; ?>
+
+                        <span><?= $avg ?> (<?= $count ?>)</span>
                     </div>
 
                 </div>
@@ -260,8 +321,7 @@ LIMIT 4"
 
 
     <div class="text-center mt-4 mb-4">
-        <a href="view.php"
-            class="btn btn-danger px-4 py-2">
+        <a href="view.php" class="btn btn-danger px-4 py-2">
             Xem thêm
         </a>
     </div>

@@ -171,7 +171,12 @@ if (isset($_POST['cancel_order'])) {
                     </form>
 
                 <?php endif; ?>
-
+                <?php if ($order['status'] == 'completed'): ?>
+                    <button class="btn btn-success"
+                        onclick="event.stopPropagation(); window.location.href='comment.php?id=<?= $order['id'] ?>'">
+                        Đánh giá
+                    </button>
+                <?php endif; ?>
             </div>
         </div>
     </div>

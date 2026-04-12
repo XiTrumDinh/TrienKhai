@@ -30,6 +30,27 @@ $similar = $db->select(
     "ii",
     [$p['category_id'], $id]
 );
+// LẤY REVIEW 
+$reviews = $db->select(
+    "SELECT r.*, u.username 
+     FROM reviews r
+     JOIN users u ON r.user_id = u.id
+     WHERE r.product_id = ?
+     ORDER BY r.created_at DESC",
+    "i",
+    [$id]
+);
+
+// TÍNH TRUNG BÌNH 
+$avg = $db->select(
+    "SELECT AVG(rating) as avg_rating, COUNT(*) as total 
+     FROM reviews WHERE product_id = ?",
+    "i",
+    [$id]
+);
+
+$avg_rating = round($avg[0]['avg_rating'] ?? 0, 1);
+$total_review = $avg[0]['total'] ?? 0;
 ?>
 
 <!DOCTYPE html>
@@ -84,7 +105,7 @@ $similar = $db->select(
                     ?>
                     <span class="sale">-<?= $percent ?>%</span>
                     <div class="rating">
-                        ⭐ 0.0 (0 đánh giá)
+                        ⭐ <?= $avg_rating ?> (<?= $total_review ?> đánh giá)
                     </div>
                 </div>
 
@@ -98,8 +119,7 @@ $similar = $db->select(
 
                 <div class="d-flex gap-3 mt-3">
 
-                    <a href="controller/addtocart.php?id=<?= $p['id'] ?>"
-                        class="btn btn-danger px-4 py-2 fw-bold">
+                    <a href="controller/addtocart.php?id=<?= $p['id'] ?>" class="btn btn-danger px-4 py-2 fw-bold">
                         MUA NGAY
                     </a>
 
@@ -127,29 +147,29 @@ $similar = $db->select(
 
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
 
-            <?php foreach ($similar as $p): ?>
+            <?php foreach ($similar as $sp): ?>
 
                 <div class="col">
 
-                    <a href="descript.php?id=<?= $p['id'] ?>" class="product-link">
+                    <a href="descript.php?id=<?= $sp['id'] ?>" class="product-link">
 
                         <div class="similar-card">
 
-                            <img src="public/img/<?= $p['image'] ?>" class="img-fluid">
+                            <img src="public/img/<?= $sp['image'] ?>" class="img-fluid">
 
                             <h6 class="name">
-                                <?= $p['name'] ?>
+                                <?= $sp['name'] ?>
                             </h6>
                             <div class="old_price">
                                 <span class="text-decoration-line-through text-muted ">
-                                    <?= number_format($p['price'], 0, ',', '.') ?> ₫</span>
+                                    <?= number_format($sp['price'], 0, ',', '.') ?> ₫</span>
                             </div>
                             <div class="price">
-                                <?= number_format($p['price'], 0, ',', '.') ?> ₫
+                                <?= number_format($sp['price'], 0, ',', '.') ?> ₫
                             </div>
 
                             <?php
-                            $percent = round((($p['old_price'] - $p['price']) / $p['old_price']) * 100);
+                            $percent = round((($sp['old_price'] - $sp['price']) / $sp['old_price']) * 100);
                             ?>
 
                             <div class="sale">
@@ -182,9 +202,7 @@ $similar = $db->select(
                 <div class="p-3 border rounded">
                     <h4>Chi tiết sản phẩm</h4>
 
-                    <p>
-                        <?= $p['short_description'] ?>
-                    </p>
+
                     <p>
                         <?= $p['description'] ?>
                     </p>
@@ -213,22 +231,51 @@ $similar = $db->select(
                     </table>
                 </div>
 
-                    <!--Đánh giá-->
+                <!--Đánh giá-->
                 <div id="review" class="p-3 border rounded mt-3">
+
                     <h4>Đánh giá người dùng</h4>
 
-                    <div id="review-form" style="display:none;">
-                        <p><strong>Người dùng:</strong> Nguyễn Văn A</p>
-
-                        <div class="rating-star">
-                            ⭐ ⭐ ⭐ ⭐ ⭐
-                        </div>
-
-                        <textarea class="form-control my-2"
-                            placeholder="Nhập đánh giá của bạn..."></textarea>
-
-                        <button class="btn btn-danger">Gửi đánh giá</button>
+                    <!-- Tổng -->
+                    <div class="mb-3">
+                        <b>⭐ <?= $avg_rating ?>/5</b>
+                        <span>(<?= $total_review ?> đánh giá)</span>
                     </div>
+
+                    <?php if (!empty($reviews)): ?>
+
+                        <?php foreach ($reviews as $r): ?>
+
+                            <div class="review-item mb-3 pb-2 border-bottom">
+
+                                <b><?= $r['username'] ?></b>
+
+                                <!-- sao -->
+                                <div>
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <?= $i <= $r['rating'] ? '⭐' : '☆' ?>
+                                    <?php endfor; ?>
+                                </div>
+
+                                <!-- comment -->
+                                <?php if (!empty($r['comment'])): ?>
+                                    <p><?= $r['comment'] ?></p>
+                                <?php endif; ?>
+
+                                <small class="text-muted">
+                                    <?= $r['created_at'] ?>
+                                </small>
+
+                            </div>
+
+                        <?php endforeach; ?>
+
+                    <?php else: ?>
+
+                        <p>Chưa có đánh giá nào</p>
+
+                    <?php endif; ?>
+
                 </div>
 
             </div>

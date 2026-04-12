@@ -20,39 +20,49 @@ $categories = $db->select("SELECT * FROM categories", "", []);
 // XỬ LÝ THÊM SẢN PHẨM (ADD)
 if (isset($_POST['addProduct'])) {
 
-    $flash = isset($_POST['flash_sale']) ? 1 : 0;
-    $status = isset($_POST['status']) ? 1 : 0;
+    // ===== FLASH SALE =====
+    $flash = isset($_POST['flash_sale']) ? '1' : '0';
 
-    $image = $_FILES['image']['name'];
-    move_uploaded_file($_FILES['image']['tmp_name'], "public/img/" . $image);
+    // ===== STATUS =====
+    // tick = hiện = '0'
+    // bỏ tick = ẩn = '1'
+    $status = isset($_POST['status']) ? '0' : '1';
 
-    // Kiểm tra và lấy category_id từ form để tránh lỗi Undefined
-    $category_id = isset($_POST['category_id']) && $_POST['category_id'] !== "" ? $_POST['category_id'] : null;
+    // ===== IMAGE =====
+    $image = "";
+    if (!empty($_FILES['image']['name'])) {
+        $image = $_FILES['image']['name'];
+        move_uploaded_file($_FILES['image']['tmp_name'], "public/img/" . $image);
+    }
 
-    if ($category_id === null) {
-        echo "<script>alert('Vui lòng chọn danh mục cho sản phẩm!'); window.history.back();</script>";
+    // ===== CATEGORY =====
+    $category_id = $_POST['category_id'] ?? null;
+
+    if (!$category_id) {
+        echo "<script>alert('Chọn danh mục!'); history.back();</script>";
         exit();
     }
 
-    $sql = "INSERT INTO products (name, old_price, price, description, short_description, image, flash_sale, status, category_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    // ===== INSERT =====
+    $sql = "INSERT INTO products 
+    (name, old_price, price, description, short_description, image, flash_sale, status, category_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    $db->execute($sql, "siisssiii", [
+    $db->execute($sql, "siisssssi", [
         $_POST['name'],
         $_POST['old_price'],
         $_POST['price'],
         $_POST['description'],
         $_POST['short_description'],
         $image,
-        $flash,
-        $status,
+        $flash,   // string '1' hoặc '0'
+        $status,  // string '1' hoặc '0'
         $category_id
     ]);
 
     header("Location: crud.php");
     exit();
 }
-
 // XỬ LÝ XÓA SẢN PHẨM (DELETE)
 if (isset($_GET['delete'])) {
     $sql = "DELETE FROM products WHERE id = ?";
@@ -64,27 +74,32 @@ if (isset($_GET['delete'])) {
 
 // XỬ LÝ CẬP NHẬT SẢN PHẨM (UPDATE)
 if (isset($_POST['updateProduct'])) {
+    // ===== FLASH SALE =====
+    $flash = isset($_POST['flash_sale']) ? '1' : '0';
 
-    $flash = isset($_POST['flash_sale']) ? 1 : 0;
-    $status = isset($_POST['status']) ? 1 : 0;
+    // ===== STATUS =====
+    // tick = hiện = '0'
+    // bỏ tick = ẩn = '1'
+    $status = isset($_POST['status']) ? '0' : '1';
+
     $image = $_FILES['image']['name'];
 
-    // Kiểm tra category_id khi sửa
-    $category_id = isset($_POST['category_id']) && $_POST['category_id'] !== "" ? $_POST['category_id'] : null;
+    $category_id = $_POST['category_id'] ?? null;
 
-    if ($category_id === null) {
-        echo "<script>alert('Vui lòng chọn danh mục cho sản phẩm!'); window.history.back();</script>";
+    if (!$category_id) {
+        echo "<script>alert('Chọn danh mục!'); history.back();</script>";
         exit();
     }
 
     if ($image != "") {
+
         move_uploaded_file($_FILES['image']['tmp_name'], "public/img/" . $image);
 
         $sql = "UPDATE products 
-                SET name=?, old_price=?, price=?, description=?, short_description=?, image=?, flash_sale=?, status=?, category_id=? 
-                WHERE id=?";
+        SET name=?, old_price=?, price=?, description=?, short_description=?, image=?, flash_sale=?, status=?, category_id=? 
+        WHERE id=?";
 
-        $db->execute($sql, "siisssiiii", [
+        $db->execute($sql, "siisssssii", [
             $_POST['name'],
             $_POST['old_price'],
             $_POST['price'],
@@ -96,12 +111,14 @@ if (isset($_POST['updateProduct'])) {
             $category_id,
             $_POST['id']
         ]);
+        var_dump($flash, $status);
     } else {
-        $sql = "UPDATE products 
-                SET name=?, old_price=?, price=?, description=?, short_description=?, flash_sale=?, status=?, category_id=? 
-                WHERE id=?";
 
-        $db->execute($sql, "siissiiii", [
+        $sql = "UPDATE products 
+        SET name=?, old_price=?, price=?, description=?, short_description=?, flash_sale=?, status=?, category_id=? 
+        WHERE id=?";
+
+        $db->execute($sql, "siisssssi", [
             $_POST['name'],
             $_POST['old_price'],
             $_POST['price'],
@@ -171,9 +188,10 @@ if (isset($_GET['keyword']) && isset($_GET['from']) && $_GET['from'] === 'crud')
 // LẤY CATEGORY ĐỂ LỌC
 $category_filter = isset($_GET['category']) ? $_GET['category'] : '';
 
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $limit = 5;
-if ($page < 1) $page = 1;
+if ($page < 1)
+    $page = 1;
 
 $where = [];
 $params = [];
@@ -208,8 +226,10 @@ $totalData = $db->select(
 
 $total = $totalData[0]['total'];
 $totalPages = ceil($total / $limit);
-if ($totalPages < 1) $totalPages = 1;
-if ($page > $totalPages) $page = $totalPages;
+if ($totalPages < 1)
+    $totalPages = 1;
+if ($page > $totalPages)
+    $page = $totalPages;
 
 $offset = ($page - 1) * $limit;
 
@@ -271,11 +291,8 @@ $products = $db->select($sql, $selectTypes, $selectParams);
                     <form method="GET" action="crud.php" class="flex-grow-1">
                         <div class="input-group">
 
-                            <input type="hidden" name="from" value="crud"> <input
-                                type="search"
-                                name="keyword"
-                                class="form-control"
-                                placeholder="Tìm sản phẩm..."
+                            <input type="hidden" name="from" value="crud"> <input type="search" name="keyword"
+                                class="form-control" placeholder="Tìm sản phẩm..."
                                 value="<?= htmlspecialchars($keyword) ?>">
 
                             <button class="btn btn-outline-secondary" type="submit">
@@ -289,15 +306,12 @@ $products = $db->select($sql, $selectTypes, $selectParams);
                     $current_cat = isset($_GET['category']) ? $_GET['category'] : '';
                     ?>
 
-                    <select id="categoryFilter"
-                        class="form-select w-auto"
-                        onchange="filterCategory(this.value)">
+                    <select id="categoryFilter" class="form-select w-auto" onchange="filterCategory(this.value)">
 
                         <option value="">Tất cả danh mục</option>
 
                         <?php foreach ($categories as $cat): ?>
-                            <option value="<?= $cat['id'] ?>"
-                                <?= ($current_cat == $cat['id']) ? 'selected' : '' ?>>
+                            <option value="<?= $cat['id'] ?>" <?= ($current_cat == $cat['id']) ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($cat['name']) ?>
                             </option>
                         <?php endforeach; ?>
@@ -378,12 +392,11 @@ $products = $db->select($sql, $selectTypes, $selectParams);
                                         <input type="checkbox" disabled <?= $item['flash_sale'] ? 'checked' : '' ?>>
                                     </td>
                                     <td>
-                                        <input type="checkbox" disabled <?= $item['status'] ? 'checked' : '' ?>>
+                                        <input type="checkbox" disabled <?= !$item['status'] ? 'checked' : '' ?>>
                                     </td>
                                     <td>
 
-                                        <button class="btn btn-warning btn-sm"
-                                            data-bs-toggle="modal"
+                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
                                             data-bs-target="#edit<?= $item['id'] ?>">
                                             Edit
                                         </button>
@@ -409,20 +422,24 @@ $products = $db->select($sql, $selectTypes, $selectParams);
                                                             value="<?= $item['price'] ?>" required>
 
                                                         <label class="mb-1 small text-secondary">Mô tả</label>
-                                                        <textarea name="description" class="form-control mb-2"><?= $item['description'] ?></textarea>
+                                                        <textarea name="description"
+                                                            class="form-control mb-2"><?= $item['description'] ?></textarea>
 
                                                         <label class="mb-1 small text-secondary">Mô tả ngắn</label>
-                                                        <input type="text" name="short_description" class="form-control mb-2"
+                                                        <input type="text" name="short_description"
+                                                            class="form-control mb-2"
                                                             value="<?= $item['short_description'] ?>">
 
                                                         <label class="mb-1 small text-secondary">Ảnh sản phẩm</label>
                                                         <input type="file" name="image" class="form-control mb-2">
 
-                                                        <label class="mb-1 small text-secondary">Danh mục <span class="text-danger">*</span></label>
+                                                        <label class="mb-1 small text-secondary">Danh mục <span
+                                                                class="text-danger">*</span></label>
                                                         <select name="category_id" class="form-select mb-2" required>
                                                             <option value="">-- Chọn danh mục --</option>
                                                             <?php foreach ($categories as $cat): ?>
-                                                                <option value="<?= $cat['id'] ?>" <?= (isset($item['category_id']) && $item['category_id'] == $cat['id']) ? 'selected' : '' ?>>
+                                                                <option value="<?= $cat['id'] ?>"
+                                                                    <?= (isset($item['category_id']) && $item['category_id'] == $cat['id']) ? 'selected' : '' ?>>
                                                                     <?= $cat['name'] ?>
                                                                 </option>
                                                             <?php endforeach; ?>
@@ -430,19 +447,20 @@ $products = $db->select($sql, $selectTypes, $selectParams);
 
                                                         <label>
                                                             <input type="checkbox" name="flash_sale" value="1"
-                                                                <?= $item['flash_sale'] ? 'checked' : '' ?>>
+                                                                <?= $item['flash_sale'] == '1' ? 'checked' : '' ?>>
                                                             Flash Sale
                                                         </label>
 
                                                         <label class="ms-3">
                                                             <input type="checkbox" name="status" value="1"
-                                                                <?= $item['status'] ? 'checked' : '' ?>>
+                                                                <?= $item['status'] == '0' ? 'checked' : '' ?>>
                                                             Hiển thị
                                                         </label>
 
                                                         <br><br>
 
-                                                        <button name="updateProduct" class="btn btn-primary">Cập nhật</button>
+                                                        <button name="updateProduct" class="btn btn-primary">Cập
+                                                            nhật</button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -450,8 +468,7 @@ $products = $db->select($sql, $selectTypes, $selectParams);
 
                                         <br>
 
-                                        <a href="?delete=<?= $item['id'] ?>"
-                                            class="btn btn-danger btn-sm mt-1"
+                                        <a href="?delete=<?= $item['id'] ?>" class="btn btn-danger btn-sm mt-1"
                                             onclick="return confirm('Xóa sản phẩm này?')">
                                             Delete
                                         </a>

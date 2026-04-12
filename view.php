@@ -1,53 +1,102 @@
-
 <?php
 require_once "Database/Database.php";
+
 $category = $_GET['category'] ?? null;
 $keyword = $_GET['keyword'] ?? "";
 $page = $_GET['page'] ?? 1;
-
+$flash = $_GET['flash'] ?? null;
 $db = new Database();
 
+/*  FIX SEARCH  */
+if (!empty($keyword)) {
+    $category = null;
+}
+
+/*  BANNER  */
+$defaultBanner = "banner1.jpg";
+
+if (!empty($keyword)) {
+    $banner = $defaultBanner;
+} else if (!empty($category)) {
+    $result = $db->select(
+        "SELECT image FROM categories WHERE id = ?",
+        "i",
+        [$category]
+    );
+    $banner = $result[0]['image'] ?? $defaultBanner;
+} else {
+    $banner = $defaultBanner;
+}
+
+/*  PAGINATION  */
 $limit = 10;
-$page = (int)$page;
+$page = (int) $page;
+if ($page < 1)
+    $page = 1;
+
 $offset = ($page - 1) * $limit;
 
-/* BUILD QUERY */
-$sql = "SELECT * FROM products WHERE flash_sale = 0";
-$sqlCount = "SELECT COUNT(*) FROM products WHERE flash_sale = 0";
+
+
+/*  QUERY  */
+$sql = "
+SELECT 
+    p.*,
+    IFNULL(r.avg_rating, 0) AS avg_rating,
+    IFNULL(r.total_review, 0) AS total_review
+FROM products p
+LEFT JOIN (
+    SELECT 
+        product_id,
+        AVG(rating) AS avg_rating,
+        COUNT(*) AS total_review
+    FROM reviews
+    GROUP BY product_id
+) r ON p.id = r.product_id
+WHERE p.status = '0'
+";
+
+$sqlCount = "
+SELECT COUNT(*) FROM products 
+WHERE status = '0'
+";
+
+/* ===== filter flash sale ===== */
+if ($flash) {
+    $sql .= " AND p.flash_sale = '1'";
+    $sqlCount .= " AND flash_sale = '1'";
+}
 
 $params = [];
 $types = "";
 
-/* filter category */
+/* ===== filter category ===== */
 if ($category) {
-    $sql .= " AND category_id = ?";
+    $sql .= " AND p.category_id = ?";
     $sqlCount .= " AND category_id = ?";
     $params[] = $category;
     $types .= "i";
 }
 
-/* filter keyword */
+/* ===== filter keyword ===== */
 if ($keyword) {
-    $sql .= " AND name LIKE ?";
+    $sql .= " AND p.name LIKE ?";
     $sqlCount .= " AND name LIKE ?";
     $params[] = "%$keyword%";
     $types .= "s";
 }
 
-/* order + limit */
-$sql .= " ORDER BY created_at DESC LIMIT $offset, $limit";
+/* ===== order + limit ===== */
+$sql .= " ORDER BY p.created_at DESC LIMIT $offset, $limit";
 
-/* query */
+/* ===== query ===== */
 $products = $db->select($sql, $types, $params);
 
-/* total */
+/* ===== total ===== */
 $total = $db->count($sqlCount, $types, $params);
-
-/* total page */
 $totalPage = ceil($total / $limit);
-/*Doi anh */
-$banner = $db->select("SELECT image FROM categories LIMIT 1")[0]['image'];
 ?>
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -72,75 +121,99 @@ $banner = $db->select("SELECT image FROM categories LIMIT 1")[0]['image'];
     <br>
     <div class="container">
         <div class="banner">
-            <img src="public/img/banner1.jpg" alt="Banner">
+            <img src="public/img/<?= $banner ?>" alt="Banner">
         </div>
     </div>
 
+    <!--  PRODUCT LIST  -->
     <section class="product-list container">
-        <?php foreach ($products as $p): ?>
 
-            <a href="descript.php?id=<?= $p['id'] ?>" class="product-link">
+        <?php if (!empty($products)): ?>
 
-                <div class="product-item">
+            <?php foreach ($products as $p): ?>
 
-                    <img src="public/img/<?= $p['image'] ?>">
+                <?php
+                $avg = $p['avg_rating'] ? round($p['avg_rating'], 1) : 0;
+                $count = $p['total_review'] ?? 0;
+                $full = floor($avg);
+                ?>
 
-                    <h4><?= $p['name'] ?></h4>
+                <a href="descript.php?id=<?= $p['id'] ?>" class="product-link">
 
-                    <div class="spec">
-                        <?= $p['short_description'] ?>
+                    <div class="product-item">
+
+                        <img src="public/img/<?= $p['image'] ?>">
+
+                        <h4><?= $p['name'] ?></h4>
+
+                        <div class="spec">
+                            <?= $p['short_description'] ?>
+                        </div>
+
+                        <div class="old">
+                            <?= number_format($p['old_price'], 0, ',', '.') ?> ₫
+                        </div>
+
+                        <div class="price-row">
+
+                            <span class="new">
+                                <?= number_format($p['price'], 0, ',', '.') ?> ₫
+                            </span>
+
+                            <?php
+                            $percent = ($p['old_price'] > 0)
+                                ? round((($p['old_price'] - $p['price']) / $p['old_price']) * 100)
+                                : 0;
+                            ?>
+
+                            <span class="sale">-<?= $percent ?>%</span>
+
+                        </div>
+
+                        <!-- ⭐ RATING -->
+                        <div class="rating">
+
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <?= ($i <= $full) ? "⭐" : "☆" ?>
+                            <?php endfor; ?>
+
+                            <span>
+                                <?= number_format($avg, 1) ?> (<?= $count ?>)
+                            </span>
+
+                        </div>
+
                     </div>
 
-                    <div class="old">
-                        <?= number_format($p['old_price'], 0, ',', '.') ?> ₫
-                    </div>
+                </a>
 
-                    <div class="price-row">
+            <?php endforeach; ?>
 
-                        <span class="new">
-                            <?= number_format($p['price'], 0, ',', '.') ?> ₫
-                        </span>
-
-                        <?php
-                        $percent = round((($p['old_price'] - $p['price']) / $p['old_price']) * 100);
-                        ?>
-
-                        <span class="sale">-<?= $percent ?>%</span>
-
-                    </div>
-
-                    <div class="rating">
-                        ⭐ 0.0 (0 đánh giá)
-                    </div>
-
-                </div>
-
-            </a>
-
-        <?php endforeach ?>
-
+        <?php else: ?>
+            <p style="text-align:center;">Không có sản phẩm</p>
+        <?php endif; ?>
 
     </section>
 
-
-    <!-- Phân trang -->
-    <div class="pagination">
+    <!-- PAGINATION -->
+    <div class="pagination text-center mt-4">
 
         <!-- Prev -->
         <a href="?category=<?= $category ?>&keyword=<?= $keyword ?>&page=<?= max(1, $page - 1) ?>">«</a>
 
         <!-- Number -->
-        <?php for ($i = 1; $i <= $totalPage; $i++) { ?>
+        <?php for ($i = 1; $i <= $totalPage; $i++): ?>
             <a class="<?= ($i == $page) ? 'active' : '' ?>"
                 href="?category=<?= $category ?>&keyword=<?= $keyword ?>&page=<?= $i ?>">
                 <?= $i ?>
             </a>
-        <?php } ?>
+        <?php endfor; ?>
 
         <!-- Next -->
         <a href="?category=<?= $category ?>&keyword=<?= $keyword ?>&page=<?= min($totalPage, $page + 1) ?>">»</a>
 
     </div>
+
     <div id="overlay"></div>
     <!-- Footer -->
     <?php include "footer.php" ?>

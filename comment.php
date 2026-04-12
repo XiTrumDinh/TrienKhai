@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 
@@ -6,27 +7,17 @@ if (!isset($_SESSION["user"])) {
     exit();
 }
 
-// chỉ admin
-if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
-    header("Location: index.php");
-    exit();
-}
-
 require_once "Database/Database.php";
 $db = new Database();
 
-// ===== GET ID =====
-if (!isset($_GET['id'])) {
-    die("Thiếu ID đơn hàng");
-}
+$order_id = $_GET['id'] ?? 0;
+$user_id = $_SESSION['id'];
 
-$order_id = $_GET['id'];
-
-// ===== LẤY THÔNG TIN ORDER =====
+// ===== LẤY ORDER =====
 $order = $db->select(
-    "SELECT * FROM orders WHERE id = ?",
-    "i",
-    [$order_id]
+    "SELECT * FROM orders WHERE id = ? AND user_id = ?",
+    "ii",
+    [$order_id, $user_id]
 );
 
 if (empty($order)) {
@@ -35,43 +26,45 @@ if (empty($order)) {
 
 $order = $order[0];
 
-// ===== LẤY CHI TIẾT SẢN PHẨM =====
+// ===== LẤY ITEMS =====
 $sql = "SELECT oi.*, p.name, p.image 
         FROM order_items oi
         JOIN products p ON oi.product_id = p.id
         WHERE oi.order_id = ?";
 
 $items = $db->select($sql, "i", [$order_id]);
-// ===== UPDATE ĐƠN =====
-if (isset($_POST['update_order'])) {
-    $phone = $_POST['phone'];
-    $address = $_POST['address'];
-    $note = $_POST['note'];
 
-    $sql = "UPDATE orders SET phone = ?, address = ?, note = ? WHERE id = ?";
-    $db->execute($sql, "sssi", [$phone, $address, $note, $order_id]);
-
-    header("Location: comment.php?id=" . $order_id);
-    exit();
-}
-// ===== REVIEW (KHÔNG SQL) =====
+// ===== SUBMIT REVIEW =====
 if (isset($_POST['submit_review'])) {
-    $_SESSION['reviews'][$order_id] = [
-        'rating' => $_POST['rating'],
-        'comment' => $_POST['comment']
-    ];
+
+    $order_item_id = $_POST['order_item_id'];
+    $product_id = $_POST['product_id'];
+    $rating = $_POST['rating'];
+    $comment = $_POST['comment'];
+
+    // check đã review chưa
+    $check = $db->select(
+        "SELECT id FROM reviews WHERE order_item_id = ?",
+        "i",
+        [$order_item_id]
+    );
+
+    if (!empty($check)) {
+        // update
+        $sql = "UPDATE reviews SET rating = ?, comment = ? WHERE order_item_id = ?";
+        $db->execute($sql, "isi", [$rating, $comment, $order_item_id]);
+    } else {
+        // insert
+        $sql = "INSERT INTO reviews (user_id, product_id, order_item_id, rating, comment)
+                VALUES (?, ?, ?, ?, ?)";
+        $db->execute($sql, "iiiis", [$user_id, $product_id, $order_item_id, $rating, $comment]);
+    }
 
     header("Location: comment.php?id=" . $order_id);
     exit();
 }
-// ===== HỦY ĐƠN =====
-if (isset($_POST['cancel_order'])) {
-    $sql = "DELETE FROM orders WHERE id = ?";
-    $db->execute($sql, "i", [$order_id]);
 
-    header("Location: completed.php");
-    exit();
-}
+
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -94,40 +87,88 @@ if (isset($_POST['cancel_order'])) {
     <div class="order-container">
         <div class="order-box">
 
-            <a href="shipping.php" class="back-btn">← Quay lại</a>
+            <a href="completed.php" class="back-btn">← Quay lại</a>
 
-            <div class="order-title">
-                Đơn hàng #<?= $order['id'] ?>
+            <h4>Đơn hàng #<?= $order['id'] ?></h4>
+
+            <div class="order-status mb-3">
+                Trạng thái: <b><?= $order['status'] ?></b>
             </div>
 
+            <!-- LIST PRODUCT -->
+            <?php foreach ($items as $i):
 
+                $review = $db->select(
+                    "SELECT * FROM reviews WHERE order_item_id = ?",
+                    "i",
+                    [$i['id']]
+                );
 
-            <!-- STATUS -->
-            <div class="order-status">
-                Trạng thái:
-                <span class="badge bg-warning"><?= $order['status'] ?></span>
-            </div>
+                $review = $review[0] ?? null;
+                ?>
 
-            <!-- PRODUCTS -->
-            <div class="product-list">
-                <?php foreach ($items as $i): ?>
-                    <div class="product-item">
+                <div class="product-item">
 
-                        <img src="public/img/<?= $i['image'] ?>" class="product-img">
+                    <img src="public/img/<?= $i['image'] ?>" class="product-img">
 
-                        <div class="product-info">
-                            <h5><?= $i['name'] ?></h5>
-                            <span>Số lượng: x<?= $i['quantity'] ?></span>
-                        </div>
+                    <div class="product-info">
+                        <h5><?= $i['name'] ?></h5>
+                        <span>x<?= $i['quantity'] ?></span>
 
-                        <div class="product-price">
-                            <span class="price"><?= number_format($i['price']) ?>₫</span>
-                            <span><?= number_format($i['price'] * $i['quantity']) ?>₫</span>
-                        </div>
+                        <?php if ($order['status'] == 'completed'): ?>
+
+                            <?php if ($review && !isset($_GET['edit_' . $i['id']])): ?>
+
+                                <!-- HIỂN THỊ -->
+                                <div class="mt-2">
+                                    <?php for ($s = 1; $s <= 5; $s++): ?>
+                                        <?= $s <= $review['rating'] ? '⭐' : '☆' ?>
+                                    <?php endfor; ?>
+
+                                    <p><?= $review['comment'] ?></p>
+
+                                    <a href="?id=<?= $order_id ?>&edit_<?= $i['id'] ?>=1" class="btn btn-sm btn-primary">
+                                        Sửa
+                                    </a>
+                                </div>
+
+                            <?php else: ?>
+
+                                <!-- FORM -->
+                                <form method="POST" class="mt-2">
+
+                                    <input type="hidden" name="order_item_id" value="<?= $i['id'] ?>">
+                                    <input type="hidden" name="product_id" value="<?= $i['product_id'] ?>">
+
+                                    <div class="rating mb-2">
+                                        <?php for ($s = 5; $s >= 1; $s--): ?>
+                                            <input type="radio" name="rating" value="<?= $s ?>" id="star<?= $i['id'] . $s ?>" required>
+                                            <label for="star<?= $i['id'] . $s ?>">★</label>
+                                        <?php endfor; ?>
+                                    </div>
+
+                                    <textarea name="comment" class="form-control mb-2"
+                                        placeholder="Nhận xét (không bắt buộc)..."><?= $review['comment'] ?? '' ?></textarea>
+
+                                    <button name="submit_review" class="btn btn-success btn-sm">
+                                        <?= $review ? 'Cập nhật' : 'Gửi đánh giá' ?>
+                                    </button>
+
+                                </form>
+
+                            <?php endif; ?>
+
+                        <?php endif; ?>
 
                     </div>
-                <?php endforeach; ?>
-            </div>
+
+                    <div class="product-price">
+                        <?= number_format($i['price']) ?>₫
+                    </div>
+
+                </div>
+
+            <?php endforeach; ?>
 
             <!-- TOTAL -->
             <div class="total-box">
@@ -147,115 +188,10 @@ if (isset($_POST['cancel_order'])) {
 
                 </div>
             </div>
-            <div class="order-actions mt-3 d-flex justify-content-end gap-2">
 
-                <!-- Luôn có nút liên hệ -->
-                <button class="btn btn-warning">
-                    Liên Hệ
-                </button>
-
-                <?php if ($order['status'] == 'pending'): ?>
-
-                    <!-- SỬA -->
-                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editOrder">
-                        Sửa thông tin
-                    </button>
-
-                    <!-- HỦY -->
-                    <form method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy đơn?');">
-                        <button name="cancel_order" class="btn btn-danger">
-                            Hủy đơn
-                        </button>
-                    </form>
-
-                <?php endif; ?>
-
-            </div>
-            <?php if ($order['status'] == 'completed'): ?>
-
-                <?php if (isset($_SESSION['reviews'][$order_id]) && !isset($_GET['edit'])):
-                    $r = $_SESSION['reviews'][$order_id];
-                ?>
-
-                    <!-- HIỂN THỊ REVIEW -->
-                    <div class="mt-4 p-3 border rounded">
-                        <h5>Đánh giá của bạn</h5>
-
-                        <p>
-                            <?php for ($i = 1; $i <= 5; $i++): ?>
-                                <?= $i <= $r['rating'] ? '⭐' : '☆' ?>
-                            <?php endfor; ?>
-                        </p>
-
-                        <p><?= $r['comment'] ?></p>
-
-                        <!-- NÚT SỬA -->
-                        <a href="comment.php?id=<?= $order_id ?>&edit=1" class="btn btn-primary">
-                            Sửa đánh giá
-                        </a>
-                    </div>
-
-                <?php else: ?>
-
-                    <!-- FORM (THÊM + SỬA) -->
-                    <form method="POST" class="mt-4">
-
-                        <h5>Đánh giá đơn hàng</h5>
-
-                        <?php
-                        $old = $_SESSION['reviews'][$order_id] ?? null;
-                        ?>
-
-                        <!-- STAR -->
-                        <div class="mb-3 rating">
-                            <?php for ($i = 5; $i >= 1; $i--): ?>
-                                <input type="radio" name="rating" value="<?= $i ?>" id="star<?= $i ?>"
-                                    <?= ($old && $old['rating'] == $i) ? 'checked' : '' ?>>
-                                <label for="star<?= $i ?>">★</label>
-                            <?php endfor; ?>
-                        </div>
-
-                        <!-- COMMENT -->
-                        <div class="mb-3">
-                            <label>Bình luận:</label>
-                            <textarea name="comment" class="form-control" rows="3" required><?= $old['comment'] ?? '' ?></textarea>
-                        </div>
-
-                        <button name="submit_review" class="btn btn-success">
-                            <?= $old ? 'Cập nhật' : 'Gửi đánh giá' ?>
-                        </button>
-
-                    </form>
-
-                <?php endif; ?>
-
-            <?php endif; ?>
         </div>
     </div>
-    <div class="modal fade" id="editOrder">
-        <div class="modal-dialog">
-            <form method="POST">
-                <div class="modal-content p-3">
 
-                    <h5>Sửa thông tin</h5>
-
-                    <label>SĐT</label>
-                    <input type="text" name="phone" class="form-control mb-2" value="<?= $order['phone'] ?>">
-
-                    <label>Địa chỉ</label>
-                    <input type="text" name="address" class="form-control mb-3" value="<?= $order['address'] ?>">
-
-                    <label>Ghi chú</label>
-                    <input type="text" name="note" class="form-control mb-3" value="<?= $order['note'] ?>">
-
-                    <button name="update_order" class="btn btn-primary">
-                        Lưu
-                    </button>
-
-                </div>
-            </form>
-        </div>
-    </div>
 
     <?php include "footer.php" ?>
 

@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+
 if (!isset($_SESSION["user"])) {
     header("Location: login.php");
     exit();
@@ -82,11 +86,18 @@ switch ($sort) {
 // RUN QUERY
 $stmt = $db->conn->prepare($sql);
 
+if (!$stmt) {
+    die("SQL lỗi: " . $db->conn->error);
+}
+
 if (!empty($params)) {
     $stmt->bind_param($types, ...$params);
 }
 
-$stmt->execute();
+if (!$stmt->execute()) {
+    die("Execute lỗi: " . $stmt->error);
+}
+
 $result = $stmt->get_result();
 $orders = $result->fetch_all(MYSQLI_ASSOC);
 ?>

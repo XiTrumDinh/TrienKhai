@@ -119,7 +119,7 @@ $total_review = $avg[0]['total'] ?? 0;
 
                 <div class="d-flex gap-3 mt-3">
 
-                    <a href="controller/addtocart.php?id=<?= $p['id'] ?>" class="btn btn-danger px-4 py-2 fw-bold">
+                    <a href="Controller/addtocart.php?id=<?= $p['id'] ?>" class="btn btn-danger px-4 py-2 fw-bold">
                         MUA NGAY
                     </a>
 

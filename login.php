@@ -19,8 +19,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if (!empty($user)) {
         $_SESSION["user"] = $user[0]["username"];
-        $_SESSION["role"] = $user[0]["role"];   // thêm dòng này
-
+        $_SESSION["role"] = $user[0]["role"];
+        $_SESSION["id"] = $user[0]["id"];
         header("Location: index.php");
         exit();
     } else {

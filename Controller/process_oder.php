@@ -55,7 +55,7 @@ $stmt = $db->conn->prepare("
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
 ");
 
-$user_id = $_SESSION['user_id'] ?? NULL;
+$user_id = $_SESSION['id']; 
 
 $stmt->bind_param(
     "isssssddd",

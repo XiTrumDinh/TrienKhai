@@ -1,0 +1,148 @@
+
+
+
+.order-container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 0 16px;
+}
+
+.order-box {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #eee;
+}
+
+/* ===== HEADER ===== */
+.order-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+/* ===== CUSTOMER INFO ===== */
+.customer-box {
+    background: #fafafa;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.customer-box p {
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+/* ===== STATUS ===== */
+.order-status {
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.badge {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+/* ===== PRODUCT LIST ===== */
+.product-list {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.product-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.product-item:last-child {
+    border-bottom: none;
+}
+
+.product-img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.product-info {
+    flex: 1;
+}
+
+.product-info h5 {
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.product-info span {
+    font-size: 13px;
+    color: #777;
+}
+
+.product-price {
+    text-align: right;
+}
+
+.product-price span {
+    display: block;
+}
+
+.price {
+    color: #ee4d2d;
+    font-weight: bold;
+}
+
+/* ===== TOTAL BOX ===== */
+.total-box {
+    margin-top: 16px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.total-final {
+  display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    color: #ee4d2d;
+}
+
+/* ===== BUTTON ===== */
+.back-btn {
+    margin-bottom: 12px;
+    display: inline-block;
+    text-decoration: none;
+    color: #333;
+}
+
+.back-btn:hover {
+    color: #ee4d2d;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+
+    .product-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .product-price {
+        width: 100%;
+        text-align: left;
+    }
+}

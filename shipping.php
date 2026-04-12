@@ -8,56 +8,66 @@ if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
 }
-$sql = "SELECT * FROM orders WHERE status = 'pending' ORDER BY id DESC";
-$order = $db->select($sql);
-$order = $order[0] ?? null;
-$order_id = $order['id'] ?? null;
 
+$user_id = $_SESSION['id'];
+
+// ===== LẤY TẤT CẢ ĐƠN =====
+$sql = "
+    SELECT * FROM orders 
+    WHERE user_id = ? AND status = 'pending'
+    ORDER BY id DESC
+";
+
+$orders = $db->select($sql, "i", [$user_id]);
+
+// ===== LẤY ITEMS CHO TỪNG ORDER =====
+$order_items_map = [];
+
+if (!empty($orders)) {
+    foreach ($orders as $o) {
+
+        $sql_items = "
+            SELECT 
+                oi.*, 
+                p.name, 
+                p.image, 
+                c.name AS category_name
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE oi.order_id = ?
+        ";
+
+        $items = $db->select($sql_items, "i", [$o['id']]);
+        $order_items_map[$o['id']] = $items;
+    }
+}
+
+// ===== HỦY ĐƠN =====
 if (isset($_POST['cancel_order'])) {
-    $sql_delete = "DELETE FROM orders WHERE id = ?";
-    $db->execute($sql_delete, "i", [$order_id]);
+    $order_id = $_POST['order_id'];
 
-    // reload lại trang
+    $sql_delete = "DELETE FROM orders WHERE id = ? AND user_id = ?";
+    $db->execute($sql_delete, "ii", [$order_id, $user_id]);
+
     header("Location: shipping.php");
     exit();
 }
-$sql_items = "
-    SELECT oi.*, p.name, p.image
-    FROM order_items oi
-    JOIN products p ON oi.product_id = p.id
-    WHERE oi.order_id = ?
-";
-$cart_items = [];
-$totalQty = 0;
-$total = 0;
 
-if ($order_id) {
-    $sql_items = "
-        SELECT oi.*, p.name, p.image
-        FROM order_items oi
-        JOIN products p ON oi.product_id = p.id
-        WHERE oi.order_id = ?
-    ";
-
-    $cart_items = $db->select($sql_items, "i", [$order_id]);
-
-    foreach ($cart_items as $row) {
-        $totalQty += $row['quantity'];
-        $total += $row['price'] * $row['quantity'];
-    }
-}
+// ===== UPDATE =====
 if (isset($_POST['update_order'])) {
     $id = $_POST['order_id'];
     $phone = $_POST['phone'];
     $address = $_POST['address'];
 
-    $sql = "UPDATE orders SET phone = ?, address = ? WHERE id = ?";
-    $db->execute($sql, "ssi", [$phone, $address, $id]);
+    $sql = "UPDATE orders SET phone = ?, address = ? WHERE id = ? AND user_id = ?";
+    $db->execute($sql, "ssii", [$phone, $address, $id, $user_id]);
 
     header("Location: shipping.php");
     exit();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -78,7 +88,6 @@ if (isset($_POST['update_order'])) {
 
     <div class="cart-container">
         <a href="index.php" class="back-home">← Trở về trang chủ</a>
-
         <div class="cart-box">
 
             <!-- STEPS -->
@@ -90,7 +99,7 @@ if (isset($_POST['update_order'])) {
 
                 <div class="step" onclick="goToPage('packing.php')">
                     <div class="icon">📦</div>
-                    <div class="label">Chờ đóng gói</div>
+                    <div class="label">Đóng gói</div>
                 </div>
 
                 <div class="step" onclick="goToPage('come.php')">
@@ -104,91 +113,142 @@ if (isset($_POST['update_order'])) {
                 </div>
             </div>
 
-            <!-- CART ITEMS -->
-            <?php if (!empty($cart_items)) { ?>
+            <!-- ORDER CARD -->
+            <?php if (!empty($orders)) { ?>
 
-                <?php foreach ($cart_items as $row) { ?>
-                    <div class="cart-item">
-                        <img src="public/img/<?php echo $row['image']; ?>" />
+                <?php foreach ($orders as $order) { ?>
 
-                        <div class="item-info">
-                            <h4><?php echo $row['name']; ?></h4>
+                    <?php
+                    $items = $order_items_map[$order['id']] ?? [];
+                    $firstItem = $items[0] ?? null;
+                    $itemCount = count($items);
+
+                    $totalQty = 0;
+                    foreach ($items as $i) {
+                        $totalQty += $i['quantity'];
+                    }
+                    ?>
+
+                    <div class="order-card" onclick="goDetail(<?= $order['id'] ?>)">
+
+                        <!-- HEADER -->
+                        <div class="order-header">
+                            <div class="shop-name">🏬 KiPeeDa</div>
+                            <div class="order-status"><?php echo $order['status']; ?></div>
                         </div>
+
+                        <!-- FIRST ITEM -->
+                        <?php if ($firstItem) { ?>
+                            <div class="order-item">
+
+                                <img src="public/img/<?php echo $firstItem['image']; ?>" class="product-img">
+
+                                <div class="product-info">
+                                    <h4><?php echo $firstItem['name']; ?></h4>
+                                    <p class="variant">Phân loại: <?= $firstItem['category_name'] ?></p>
+                                    <span class="qty">x<?php echo $firstItem['quantity']; ?></span>
+                                </div>
+
+                                <div class="price-box">
+                                    <?php echo number_format($firstItem['price']); ?>₫
+                                </div>
+
+                            </div>
+                        <?php } ?>
+
+                        <!-- VIEW MORE -->
+                        <?php if ($itemCount > 1) { ?>
+                            <div class="text-center">
+                                <button class="btn-view-more" onclick="toggleItems(<?php echo $order['id']; ?>)">
+                                    Xem thêm (<?php echo $itemCount - 1; ?> sản phẩm)
+                                </button>
+                            </div>
+
+                            <div id="more-<?php echo $order['id']; ?>" style="display:none;">
+
+                                <?php foreach ($items as $index => $item) {
+                                    if ($index == 0)
+                                        continue;
+                                    ?>
+
+                                    <div class="order-item small">
+
+                                        <img src="public/img/<?php echo $item['image']; ?>" class="product-img">
+
+                                        <div class="product-info">
+                                            <h5><?php echo $item['name']; ?></h5>
+                                            <span>x<?php echo $item['quantity']; ?></span>
+                                        </div>
+
+                                        <div class="price-box">
+                                            <?php echo number_format($item['price']); ?>₫
+                                        </div>
+
+                                    </div>
+
+                                <?php } ?>
+
+                            </div>
+                        <?php } ?>
+
+                        <!-- FOOTER -->
+                        <div class="order-footer">
+
+                            <div>
+                                <div>Giảm giá: <?php echo number_format($order['discount']); ?>₫</div>
+                                <div>
+                                    Tổng tiền (<?php echo $totalQty; ?> SP):
+                                    <b style="color:red;">
+                                        <?php echo number_format($order['final_total']); ?>₫
+                                    </b>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+
+                                <button class="btn btn-warning" onclick="event.stopPropagation();" data-bs-toggle="modal"
+                                    data-bs-target="#editOrder">
+                                    Liên Hệ
+                                </button>
+
+                                <form method="POST" onclick="event.stopPropagation();" onsubmit="return confirm('Hủy đơn?');">
+                                    <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
+                                    <button type="submit" name="cancel_order" class="btn btn-danger"
+                                        onclick="event.stopPropagation();">
+                                        Hủy
+                                    </button>
+                                </form>
+
+                            </div>
+
+                        </div>
+
                     </div>
+
                 <?php } ?>
 
             <?php } else { ?>
-                <p style="text-align:center; margin-top:20px;">
-                    Không có sản phẩm
-                </p>
+                <p style="text-align:center">Không có đơn hàng</p>
             <?php } ?>
 
-            <!-- SUMMARY -->
-            <div class="summary-box">
 
-                <div class="summary-row">
-                    <span>Tổng sản phẩm</span>
-                    <span><?php echo $totalQty; ?></span>
-                </div>
 
-                <div class="summary-row">
-                    <span>Tổng tiền</span>
-                    <span><?php echo number_format($total); ?>₫</span>
-                </div>
-            </div>
-            <br>
-            <div class="d-flex justify-content-end gap-2">
 
-                <!-- NÚT SỬA -->
-                <button class="btn btn-warning"
-                    data-bs-toggle="modal"
-                    data-bs-target="#editOrder">
-                    Sửa thông tin
-                </button>
 
-                <!-- NÚT HỦY -->
-                <form method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy đơn?');">
-                    <button type="submit" name="cancel_order" class="btn btn-danger">
-                        Hủy đơn hàng
-                    </button>
-                </form>
 
-            </div>
-            <div class="modal fade" id="editOrder">
-                <div class="modal-dialog">
-                    <form method="POST">
-                        <div class="modal-content p-3">
-
-                            <h5>Sửa thông tin</h5>
-
-                            <input type="hidden" name="order_id" value="<?php echo $order_id; ?>">
-
-                            <label>Số điện thoại</label>
-                            <input type="text" name="phone"
-                                class="form-control mb-2"
-                                value="<?php echo $order['phone'] ?? ''; ?>">
-
-                            <label>Địa chỉ</label>
-                            <input type="text" name="address"
-                                class="form-control mb-3"
-                                value="<?php echo $order['address'] ?? ''; ?>">
-
-                            <button name="update_order" class="btn btn-primary">
-                                Lưu thay đổi
-                            </button>
-
-                        </div>
-                    </form>
-                </div>
-            </div>
         </div>
     </div>
+
 
     <?php include "footer.php"; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="public/js/footer.js"></script>
     <script src="public/js/shipping.js"></script>
+    <script>function goDetail(id) {
+            window.location.href = "order_detail.php?id=" + id;
+        }</script>
+
 </body>
 
 </html>

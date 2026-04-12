@@ -25,8 +25,8 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
 
     foreach ($_SESSION['cart'] as $id => $qty) {
 
-        $id = (int)$id;
-        $qty = (int)$qty;
+        $id = (int) $id;
+        $qty = (int) $qty;
 
         $sql = "SELECT * FROM products WHERE id = $id";
         $result = $conn->query($sql);
@@ -34,7 +34,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
         if ($result && $result->num_rows > 0) {
 
             $row = $result->fetch_assoc();
-            $price = (float)$row['price'];
+            $price = (float) $row['price'];
 
             $subtotal = $price * $qty;
 
@@ -48,39 +48,55 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
 }
 
 // APPLY VOUCHER
+// APPLY VOUCHER
 $discount = 0;
 
 if (isset($_POST['apply_voucher'])) {
 
     $code = strtoupper(trim($_POST['voucher']));
+    $user_id = $_SESSION['id'];
 
-    $sql = "SELECT * FROM voucher WHERE voucher = ?";
-    $coupon = $db->select($sql, "s", [$code]);
+    // ===== CHECK ĐÃ DÙNG CHƯA =====
+    $sql = "SELECT * FROM orders WHERE user_id = ? AND voucher_code = ?";
+    $check = $db->select($sql, "is", [$user_id, $code]);
 
-    if (empty($coupon)) {
+    if (!empty($check)) {
 
-        $voucher_msg = "Mã giảm giá không hợp lệ!";
+        $voucher_msg = "Bạn đã sử dụng mã này rồi!";
         unset($_SESSION['voucher']);
         unset($_SESSION['discount']);
+
     } else {
 
-        $coupon = $coupon[0];
+        // ===== CHECK VOUCHER TỒN TẠI =====
+        $sql = "SELECT * FROM voucher WHERE voucher = ?";
+        $coupon = $db->select($sql, "s", [$code]);
 
-        if ($coupon['discount_type'] == 'percent') {
-            $discount = $total * ($coupon['discount_value'] / 100);
+        if (empty($coupon)) {
+
+            $voucher_msg = "Mã giảm giá không hợp lệ!";
+            unset($_SESSION['voucher']);
+            unset($_SESSION['discount']);
+
         } else {
-            $discount = $coupon['discount_value'];
-        }
 
-        if ($discount > $total) {
-            $discount = $total;
-        }
+            $coupon = $coupon[0];
 
-        $_SESSION['voucher'] = $coupon;
-        $_SESSION['discount'] = $discount;
+            if ($coupon['discount_type'] == 'percent') {
+                $discount = $total * ($coupon['discount_value'] / 100);
+            } else {
+                $discount = $coupon['discount_value'];
+            }
+
+            if ($discount > $total) {
+                $discount = $total;
+            }
+
+            $_SESSION['voucher'] = $coupon;
+            $_SESSION['discount'] = $discount;
+        }
     }
 }
-
 // GIỮ VOUCHER SAU REFRESH 
 if (isset($_SESSION['voucher'])) {
 
@@ -158,8 +174,8 @@ if (isset($_SESSION['voucher'])) {
                             <a href="Controller/updatecart.php?id=<?php echo $row['id']; ?>&action=minus"
                                 class="btn btn-sm btn-outline-secondary">-</a>
 
-                            <input type="number" value="<?php echo $row['qty']; ?>"
-                                readonly style="width:60px; text-align:center;">
+                            <input type="number" value="<?php echo $row['qty']; ?>" readonly
+                                style="width:60px; text-align:center;">
 
                             <a href="Controller/updatecart.php?id=<?php echo $row['id']; ?>&action=plus"
                                 class="btn btn-sm btn-outline-secondary">+</a>

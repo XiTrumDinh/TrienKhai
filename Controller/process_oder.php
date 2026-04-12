@@ -17,11 +17,11 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
 }
 
 // ===== LẤY DATA =====
-$name    = $_POST['name'] ?? '';
-$phone   = $_POST['phone'] ?? '';
-$email   = $_POST['email'] ?? '';
+$name = $_POST['name'] ?? '';
+$phone = $_POST['phone'] ?? '';
+$email = $_POST['email'] ?? '';
 $address = $_POST['address'] ?? '';
-$note    = $_POST['note'] ?? '';
+$note = $_POST['note'] ?? '';
 $payment = $_POST['payment'] ?? 'cod';
 
 // ===== VALIDATE NHẸ =====
@@ -35,8 +35,8 @@ $total = 0;
 
 foreach ($_SESSION['cart'] as $id => $qty) {
 
-    $id = (int)$id;
-    $qty = (int)$qty;
+    $id = (int) $id;
+    $qty = (int) $qty;
 
     $result = $db->conn->query("SELECT price FROM products WHERE id=$id");
 
@@ -47,18 +47,18 @@ foreach ($_SESSION['cart'] as $id => $qty) {
 
 $discount = $_SESSION['discount'] ?? 0;
 $final = $total - $discount;
-
+$voucher_code = $_SESSION['voucher']['voucher'] ?? null;
 // ===== INSERT ORDER =====
 $stmt = $db->conn->prepare("
     INSERT INTO orders 
-    (user_id, name, phone, email, address, note, total, discount, final_total, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+    (user_id, name, phone, email, address, note, total, discount, final_total, status, voucher_code)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,'pending', ?)
 ");
 
-$user_id = $_SESSION['id']; 
+$user_id = $_SESSION['id'];
 
 $stmt->bind_param(
-    "isssssddd",
+    "isssssddds",
     $user_id,
     $name,
     $phone,
@@ -67,7 +67,8 @@ $stmt->bind_param(
     $note,
     $total,
     $discount,
-    $final
+    $final,
+    $voucher_code
 );
 
 $stmt->execute();
@@ -76,8 +77,8 @@ $order_id = $stmt->insert_id;
 // ===== INSERT ORDER ITEMS =====
 foreach ($_SESSION['cart'] as $id => $qty) {
 
-    $id = (int)$id;
-    $qty = (int)$qty;
+    $id = (int) $id;
+    $qty = (int) $qty;
 
     $result = $db->conn->query("SELECT price FROM products WHERE id=$id");
 

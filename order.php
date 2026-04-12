@@ -17,8 +17,8 @@ $db = new Database();
 
 // ===== GET FILTER =====
 $keyword = $_GET['keyword'] ?? '';
-$status  = $_GET['status'] ?? '';
-$sort    = $_GET['sort'] ?? 'new';
+$status = $_GET['status'] ?? '';
+$sort = $_GET['sort'] ?? 'new';
 
 // ===== UPDATE STATUS =====
 if (isset($_POST["updateStatus"])) {
@@ -27,10 +27,15 @@ if (isset($_POST["updateStatus"])) {
 
     // chống hack
     $allowed = ['pending', 'confirmed', 'shipping', 'completed'];
-    if (!in_array($statusUpdate, $allowed)) die("Invalid status");
+    if (!in_array($statusUpdate, $allowed))
+        die("Invalid status");
 
     $sql = "UPDATE orders SET status=? WHERE id=?";
     $stmt = $db->conn->prepare($sql);
+
+    if (!$stmt) {
+        die("SQL lỗi: " . $db->conn->error);
+    }
     $stmt->bind_param("si", $statusUpdate, $id);
     $stmt->execute();
 
@@ -127,10 +132,7 @@ $orders = $result->fetch_all(MYSQLI_ASSOC);
                     <!-- SEARCH -->
                     <form method="GET" class="flex-grow-1">
                         <div class="input-group">
-                            <input type="search"
-                                name="keyword"
-                                class="form-control"
-                                placeholder="Tìm tên, SĐT..."
+                            <input type="search" name="keyword" class="form-control" placeholder="Tìm tên, SĐT..."
                                 value="<?= htmlspecialchars($keyword) ?>">
 
                             <button class="btn btn-outline-secondary">🔍</button>
@@ -203,12 +205,12 @@ $orders = $result->fetch_all(MYSQLI_ASSOC);
                                     <!-- ACTION -->
                                     <td>
                                         <div>
-                                            <button class="btn btn-warning btn-sm"
-                                                data-bs-toggle="modal"
+                                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
                                                 data-bs-target="#edit<?= $o["id"] ?>">
                                                 Update
                                             </button>
-                                            <a href="order_items.php?id=<?= $o["id"] ?>" class="btn btn-info btn-sm">Chi Tiết</a>
+                                            <a href="order_items.php?id=<?= $o["id"] ?>" class="btn btn-info btn-sm">Chi
+                                                Tiết</a>
                                         </div>
 
                                         <div class="modal fade" id="edit<?= $o["id"] ?>">

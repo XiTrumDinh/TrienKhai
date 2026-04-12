@@ -2,10 +2,10 @@
 -- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th3 29, 2026 lúc 08:49 PM
--- Phiên bản máy phục vụ: 8.4.7
--- Phiên bản PHP: 8.3.28
+-- Host: localhost:3306
+-- Generation Time: Apr 12, 2026 at 07:37 AM
+-- Server version: 8.4.3
+-- PHP Version: 8.3.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,26 +18,23 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `kipeeda`
+-- Database: `kipeeda`
 --
-CREATE DATABASE IF NOT EXISTS `kipeeda` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `kipeeda`;
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `categories`
+-- Table structure for table `categories`
 --
 
-CREATE TABLE IF NOT EXISTS `categories` (
-  `id` int NOT NULL AUTO_INCREMENT,
+CREATE TABLE `categories` (
+  `id` int NOT NULL,
   `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `image` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `image` varchar(255) COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `categories`
+-- Dumping data for table `categories`
 --
 
 INSERT INTO `categories` (`id`, `name`, `image`) VALUES
@@ -56,11 +53,61 @@ INSERT INTO `categories` (`id`, `name`, `image`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `products`
+-- Table structure for table `orders`
 --
 
-CREATE TABLE IF NOT EXISTS `products` (
-  `id` int NOT NULL AUTO_INCREMENT,
+CREATE TABLE `orders` (
+  `id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `phone` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `address` text COLLATE utf8mb4_general_ci NOT NULL,
+  `note` text COLLATE utf8mb4_general_ci,
+  `total` decimal(10,0) NOT NULL,
+  `discount` decimal(10,2) DEFAULT '0.00',
+  `final_total` decimal(10,2) NOT NULL,
+  `status` enum('pending','confirmed','shipping','completed') COLLATE utf8mb4_general_ci DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `name`, `phone`, `email`, `address`, `note`, `total`, `discount`, `final_total`, `status`, `created_at`) VALUES
+(7, NULL, 'DTA', '111111111', 'ko@mail.com', '1111111111111', '', 48480000, 0.00, 48480000.00, 'confirmed', '2026-04-12 07:08:25');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_items`
+--
+
+CREATE TABLE `order_items` (
+  `id` int NOT NULL,
+  `order_id` int DEFAULT NULL,
+  `product_id` int DEFAULT NULL,
+  `quantity` int DEFAULT NULL,
+  `price` decimal(10,0) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
+(10, 7, 44, 1, 17490000),
+(11, 7, 50, 1, 30990000);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `products`
+--
+
+CREATE TABLE `products` (
+  `id` int NOT NULL,
   `name` varchar(500) COLLATE utf8mb4_general_ci NOT NULL,
   `price` decimal(10,0) NOT NULL,
   `old_price` decimal(10,0) DEFAULT NULL,
@@ -70,13 +117,11 @@ CREATE TABLE IF NOT EXISTS `products` (
   `category_id` int NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `status` tinyint NOT NULL,
-  `flash_sale` tinyint DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `fk_categories_product` (`category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=97 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `flash_sale` tinyint DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `products`
+-- Dumping data for table `products`
 --
 
 INSERT INTO `products` (`id`, `name`, `price`, `old_price`, `image`, `description`, `short_description`, `category_id`, `created_at`, `status`, `flash_sale`) VALUES
@@ -128,20 +173,18 @@ INSERT INTO `products` (`id`, `name`, `price`, `old_price`, `image`, `descriptio
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `product_specs`
+-- Table structure for table `product_specs`
 --
 
-CREATE TABLE IF NOT EXISTS `product_specs` (
-  `id` int NOT NULL AUTO_INCREMENT,
+CREATE TABLE `product_specs` (
+  `id` int NOT NULL,
   `product_id` int NOT NULL,
   `spec_name` varchar(250) COLLATE utf8mb4_general_ci NOT NULL,
-  `spec_value` varchar(250) COLLATE utf8mb4_general_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_specs_products` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=180 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `spec_value` varchar(250) COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `product_specs`
+-- Dumping data for table `product_specs`
 --
 
 INSERT INTO `product_specs` (`id`, `product_id`, `spec_name`, `spec_value`) VALUES
@@ -323,38 +366,169 @@ INSERT INTO `product_specs` (`id`, `product_id`, `spec_name`, `spec_value`) VALU
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `users`
+-- Table structure for table `users`
 --
 
-CREATE TABLE IF NOT EXISTS `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
+CREATE TABLE `users` (
+  `id` int NOT NULL,
   `username` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `email` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `role` enum('admin','user') COLLATE utf8mb4_general_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `role` enum('admin','user') COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `users`
+-- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `email`, `role`) VALUES
 (1, 'admin', '1234', NULL, 'admin'),
 (2, 'user1', '1234', NULL, 'user');
 
+-- --------------------------------------------------------
+
 --
--- Ràng buộc đối với các bảng kết xuất
+-- Table structure for table `voucher`
+--
+
+CREATE TABLE `voucher` (
+  `id` int NOT NULL,
+  `voucher` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `discount_type` enum('percent','fixed') COLLATE utf8mb4_general_ci NOT NULL,
+  `discount_value` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `voucher`
+--
+
+INSERT INTO `voucher` (`id`, `voucher`, `discount_type`, `discount_value`) VALUES
+(1, 'NGUOIMOI', 'percent', 20),
+(2, 'KIPEEDA10', 'percent', 10),
+(3, 'KIPEEDA20K', 'fixed', 20000),
+(4, 'LAPTOP50K', 'fixed', 50000),
+(5, 'PCBUILD5', 'percent', 5),
+(6, 'GAMING10', 'percent', 10),
+(7, 'LINHKIEN30K', 'fixed', 30000),
+(8, 'KIPEEDA100K', 'fixed', 100000),
+(9, 'TECH15', 'percent', 15),
+(10, 'SALECUOITUAN', 'percent', 12);
+
+--
+-- Indexes for dumped tables
 --
 
 --
--- Ràng buộc cho bảng `products`
+-- Indexes for table `categories`
+--
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `orders`
+--
+ALTER TABLE `orders`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `order_items`
+--
+ALTER TABLE `order_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `order_id` (`order_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
+-- Indexes for table `products`
+--
+ALTER TABLE `products`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_categories_product` (`category_id`);
+
+--
+-- Indexes for table `product_specs`
+--
+ALTER TABLE `product_specs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_specs_products` (`product_id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `voucher`
+--
+ALTER TABLE `voucher`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `orders`
+--
+ALTER TABLE `orders`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `order_items`
+--
+ALTER TABLE `order_items`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `products`
+--
+ALTER TABLE `products`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
+
+--
+-- AUTO_INCREMENT for table `product_specs`
+--
+ALTER TABLE `product_specs`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=180;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `voucher`
+--
+ALTER TABLE `voucher`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `order_items`
+--
+ALTER TABLE `order_items`
+  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `products`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `fk_categories_product` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
 
 --
--- Ràng buộc cho bảng `product_specs`
+-- Constraints for table `product_specs`
 --
 ALTER TABLE `product_specs`
   ADD CONSTRAINT `fk_specs_products` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);

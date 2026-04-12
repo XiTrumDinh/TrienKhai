@@ -8,7 +8,7 @@ if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
 }
-$sql = "SELECT * FROM orders WHERE status = 'pending' ORDER BY id DESC";
+$sql = "SELECT * FROM orders WHERE status = 'shipping' ORDER BY id DESC";
 $order = $db->select($sql);
 $order = $order[0] ?? null;
 $order_id = $order['id'] ?? null;
@@ -46,17 +46,6 @@ if ($order_id) {
         $total += $row['price'] * $row['quantity'];
     }
 }
-if (isset($_POST['update_order'])) {
-    $id = $_POST['order_id'];
-    $phone = $_POST['phone'];
-    $address = $_POST['address'];
-
-    $sql = "UPDATE orders SET phone = ?, address = ? WHERE id = ?";
-    $db->execute($sql, "ssi", [$phone, $address, $id]);
-
-    header("Location: shipping.php");
-    exit();
-}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -83,7 +72,7 @@ if (isset($_POST['update_order'])) {
 
             <!-- STEPS -->
             <div class="cart-steps">
-                <div class="step active" onclick="goToPage('shipping.php')">
+                <div class="step" onclick="goToPage('shipping.php')">
                     <div class="icon">📋</div>
                     <div class="label">Chờ xác nhận</div>
                 </div>
@@ -93,7 +82,7 @@ if (isset($_POST['update_order'])) {
                     <div class="label">Chờ đóng gói</div>
                 </div>
 
-                <div class="step" onclick="goToPage('come.php')">
+                <div class="step active" onclick="goToPage('come.php')">
                     <div class="icon">🚚</div>
                     <div class="label">Đang giao</div>
                 </div>
@@ -137,50 +126,7 @@ if (isset($_POST['update_order'])) {
                 </div>
             </div>
             <br>
-            <div class="d-flex justify-content-end gap-2">
-
-                <!-- NÚT SỬA -->
-                <button class="btn btn-warning"
-                    data-bs-toggle="modal"
-                    data-bs-target="#editOrder">
-                    Sửa thông tin
-                </button>
-
-                <!-- NÚT HỦY -->
-                <form method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy đơn?');">
-                    <button type="submit" name="cancel_order" class="btn btn-danger">
-                        Hủy đơn hàng
-                    </button>
-                </form>
-
-            </div>
-            <div class="modal fade" id="editOrder">
-                <div class="modal-dialog">
-                    <form method="POST">
-                        <div class="modal-content p-3">
-
-                            <h5>Sửa thông tin</h5>
-
-                            <input type="hidden" name="order_id" value="<?php echo $order_id; ?>">
-
-                            <label>Số điện thoại</label>
-                            <input type="text" name="phone"
-                                class="form-control mb-2"
-                                value="<?php echo $order['phone'] ?? ''; ?>">
-
-                            <label>Địa chỉ</label>
-                            <input type="text" name="address"
-                                class="form-control mb-3"
-                                value="<?php echo $order['address'] ?? ''; ?>">
-
-                            <button name="update_order" class="btn btn-primary">
-                                Lưu thay đổi
-                            </button>
-
-                        </div>
-                    </form>
-                </div>
-            </div>
+           
         </div>
     </div>
 

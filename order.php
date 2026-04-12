@@ -26,7 +26,7 @@ if (isset($_POST["updateStatus"])) {
     $statusUpdate = $_POST["status"];
 
     // chống hack
-    $allowed = ['pending', 'confirmed', 'shipping', 'complete'];
+    $allowed = ['pending', 'confirmed', 'shipping', 'completed'];
     if (!in_array($statusUpdate, $allowed)) die("Invalid status");
 
     $sql = "UPDATE orders SET status=? WHERE id=?";
@@ -143,7 +143,7 @@ $orders = $result->fetch_all(MYSQLI_ASSOC);
                         <option value="pending" <?= ($status == 'pending') ? 'selected' : '' ?>>Pending</option>
                         <option value="confirmed" <?= ($status == 'confirmed') ? 'selected' : '' ?>>Confirmed</option>
                         <option value="shipping" <?= ($status == 'shipping') ? 'selected' : '' ?>>Shipping</option>
-                        <option value="complete" <?= ($status == 'complete') ? 'selected' : '' ?>>Complete</option>
+                        <option value="complete" <?= ($status == 'completed') ? 'selected' : '' ?>>Complete</option>
                     </select>
 
                     <!-- SORT -->
@@ -193,7 +193,7 @@ $orders = $result->fetch_all(MYSQLI_ASSOC);
                                             case 'shipping':
                                                 echo '<span class="badge bg-info">Shipping</span>';
                                                 break;
-                                            case 'complete':
+                                            case 'completed':
                                                 echo '<span class="badge bg-success">Complete</span>';
                                                 break;
                                         }
@@ -223,7 +223,7 @@ $orders = $result->fetch_all(MYSQLI_ASSOC);
                                                             <option value="pending" <?= $o["status"] == "pending" ? "selected" : "" ?>>Pending</option>
                                                             <option value="confirmed" <?= $o["status"] == "confirmed" ? "selected" : "" ?>>Confirmed</option>
                                                             <option value="shipping" <?= $o["status"] == "shipping" ? "selected" : "" ?>>Shipping</option>
-                                                            <option value="complete" <?= $o["status"] == "complete" ? "selected" : "" ?>>Complete</option>
+                                                            <option value="completed" <?= $o["status"] == "completed" ? "selected" : "" ?>>Complete</option>
                                                         </select>
 
                                                         <button name="updateStatus" class="btn btn-primary">Lưu</button>

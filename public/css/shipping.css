@@ -1,185 +1,406 @@
+/* === Reset & Base === */
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.cart-container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 0 16px;
+}
+
 .back-home {
     display: inline-block;
-    margin: 15px 0;
+    margin-bottom: 16px;
     text-decoration: none;
-    color: black;
+    color: #333;
+    font-weight: 500;
 }
 
-.status-wrapper {
-    background: red;
-    padding: 15px;
+/* === Cart Box === */
+.cart-box {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #ddd;
 }
 
+/* Banner */
+.cart-banner {
+    height: 100px;
+    background: #e57373;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+/* === Cart Item === */
+.cart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.cart-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.item-info {
+    flex: 1;
+    margin-left: 12px;
+}
+
+.item-info h4 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+
+.item-actions {
+    text-align: right;
+    min-width: 160px;
+}
+
+.price-old {
+    text-decoration: line-through;
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.price {
+    font-size: 18px;
+    font-weight: bold;
+    color: #e53935;
+    margin-bottom: 8px;
+}
+
+/* Item actions căn phải, giá trên, quantity ngay dưới */
+.item-actions {
+    display: flex;
+    flex-direction: column;
+    /* giá trên, quantity dưới */
+    align-items: flex-end;
+    /* căn phải toàn bộ */
+    gap: 4px;
+    /* khoảng cách giữa giá và số lượng */
+    min-width: 150px;
+}
+
+.price-old,
+.price {
+    margin: 0;
+    /* loại bỏ margin thừa */
+}
+
+.quantity {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.quantity input {
+    width: 50px;
+    height: 36px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    appearance: textfield;
+    -moz-appearance: textfield;
+    /* Firefox */
+}
+
+.quantity input::-webkit-outer-spin-button,
+.quantity input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    /* Chrome / Safari / Edge */
+    margin: 0;
+}
+
+/* Container số lượng */
+.quantity {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Nút cộng / trừ */
+.quantity button {
+    width: 36px;
+    /* chiều rộng thống nhất */
+    height: 36px;
+    /* chiều cao thống nhất */
+    padding: 0;
+    /* loại bỏ padding mặc định */
+    font-size: 18px;
+    /* cỡ chữ */
+    line-height: 1;
+    /* căn chữ chính giữa nút */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f5f5f5;
+    cursor: pointer;
+}
+
+/* Ô input số lượng */
+.quantity input {
+    width: 50px;
+    /* chiều rộng chuẩn */
+    height: 36px;
+    /* bằng nút */
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    /* cỡ chữ giống nút */
+}
+
+/* === Discount Box === */
+.discount-box {
+    margin: 20px 0;
+}
+
+.discount-box label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.discount-input {
+    display: flex;
+    gap: 8px;
+}
+
+.discount-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.discount-input button {
+    padding: 10px 16px;
+    background: #e53935;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* === Summary Box === */
+.summary-box {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    /* đẩy 2 bên */
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.summary-row span:last-child {
+    text-align: right;
+    min-width: 180px;
+    /* giữ cột tiền thẳng hàng */
+}
+
+.summary-row span {
+    flex: 1;
+    padding: 14px 16px;
+}
+
+.summary-row .label {
+    background: #f5f5f5;
+    font-weight: 500;
+}
+
+.summary-row .value {
+    text-align: right;
+    font-weight: bold;
+    background: #fafafa;
+}
+
+/* === Order Button === */
+.order-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    background: #e53935;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* Container steps */
 .cart-steps {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    background: #ffeaea;
+    /* màu nền nhạt */
+    padding: 16px 24px;
+    border-radius: 8px;
+    position: relative;
 }
 
-.step {
-    text-align: center;
+/* Step item */
+.cart-steps .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
     flex: 1;
-}
-
-.icon {
-    font-size: 20px;
-    margin-bottom: 5px;
-}
-
-.label {
-    font-size: 13px;
-}
-
-.step.active {
-    border: 2px solid black;
-    padding: 8px;
-    background: red;
-}
-
-.content {
-    display: none;
-    margin-top: 15px;
-}
-
-.content {
-    display: none;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
-
-.content.active {
-    display: block;
-}
-
-.total {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin: 10px 0 15px;
-}
-
-.total strong {
-    color: red;
-}
-
-.btn-group {
-    display: flex;
-    gap: 10px;
-}
-
-.contact {
-    flex: 7;
-    background: greenyellow;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-}
-
-.cancel {
-    flex: 3;
-    background: red;
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-}
-
-.container p {
-    margin: 2px 0;
-    margin-left: 15px;
-    color: #555;
+    text-align: center;
+    color: #888;
+    /* bước chưa active */
     font-size: 14px;
 }
 
-.container p::before {
-    content: "• ";
+/* Step icon */
+.cart-steps .step .icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 6px;
+    border: 2px solid #ccc;
 }
 
-.time {
-    background: #fff3cd;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ffeeba;
+/* Active step */
+.cart-steps .step.active {
+    color: #e53935;
+    /* đỏ */
 }
 
-.time h5 {
-    margin-bottom: 3px;
+.cart-steps .step.active .icon {
+    border-color: #e53935;
 }
 
-.time p {
-    margin: 0;
-    color: #555;
+/* Dấu nối giữa các bước */
+.cart-steps .step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 18px;
+    /* căn giữa icon */
+    right: -50%;
+    width: 100%;
+    height: 2px;
+    background: #ccc;
+    z-index: -1;
 }
 
-.comment {
-    width: 30%;
-    margin-left: auto;
-    /* đẩy sang phải */
-    display: block;
-
-    background: orange;
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
+.cart-steps .step.active~.step::after {
+    background: #ccc;
+    /* các bước sau vẫn xám */
 }
 
-.comment:hover {
-    background: #ff8c00;
-}
-
-.contact,
-.cancel,
-.comment {
-    margin-bottom: 10px;
-}
-
-/* ===== MOBILE ===== */
-@media (max-width: 768px) {
-
+/* Responsive mobile */
+@media (max-width: 600px) {
     .cart-steps {
-        flex-wrap: wrap;
-        gap: 10px;
+        flex-direction: column;
+        padding: 12px;
     }
 
-    .step {
-        flex: 1 1 45%;
-        padding: 5px;
+    .cart-steps .step {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 8px;
+        text-align: left;
+        margin-bottom: 12px;
     }
 
-    .label {
-        font-size: 12px;
+    .cart-steps .step:last-child {
+        margin-bottom: 0;
     }
 
-    .icon {
-        font-size: 16px;
+    .cart-steps .step::after {
+        display: none;
+    }
+}
+
+/* === Responsive Mobile === */
+@media (max-width: 768px) {
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
     }
 
-    .total {
+    .item-actions {
+        width: 100%;
+        display: flex;
         justify-content: space-between;
-        font-size: 14px;
+        align-items: center;
+        margin-top: 8px;
     }
 
-    .btn-group {
+    .quantity input {
+        width: 60px;
+    }
+
+    .summary-row {
         flex-direction: column;
     }
 
-    .contact,
-    .cancel {
-        flex: none;
-        width: 100%;
+    .summary-row span {
+        border-right: none;
+        text-align: left;
+        padding: 12px;
     }
 
-    .comment {
-        width: 100%;
-        margin-left: 0;
+    .summary-row .value {
+        text-align: right;
+    }
+}
+
+@media (max-width: 480px) {
+    .cart-container {
+        padding: 0 12px;
     }
 
-    .time {
-        font-size: 14px;
+    .cart-item img {
+        width: 90px;
+        height: 90px;
     }
 
-    .container p {
-        font-size: 13px;
+    .item-info h4 {
+        font-size: 15px;
     }
 
+    .price {
+        font-size: 16px;
+    }
+
+    .order-btn {
+        font-size: 15px;
+        padding: 12px;
+    }
+}
+
+.price_old {
+    text-decoration: line-through;
+    color: #888;
+    font-size: 13px;
 }

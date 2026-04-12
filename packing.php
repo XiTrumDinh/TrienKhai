@@ -8,7 +8,7 @@ if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
 }
-$sql = "SELECT * FROM orders WHERE status = 'pending' ORDER BY id DESC";
+$sql = "SELECT * FROM orders WHERE status = 'confirmed' ORDER BY id DESC";
 $order = $db->select($sql);
 $order = $order[0] ?? null;
 $order_id = $order['id'] ?? null;
@@ -54,7 +54,7 @@ if (isset($_POST['update_order'])) {
     $sql = "UPDATE orders SET phone = ?, address = ? WHERE id = ?";
     $db->execute($sql, "ssi", [$phone, $address, $id]);
 
-    header("Location: shipping.php");
+    header("Location: packing.php");
     exit();
 }
 ?>
@@ -83,12 +83,12 @@ if (isset($_POST['update_order'])) {
 
             <!-- STEPS -->
             <div class="cart-steps">
-                <div class="step active" onclick="goToPage('shipping.php')">
+                <div class="step" onclick="goToPage('shipping.php')">
                     <div class="icon">📋</div>
                     <div class="label">Chờ xác nhận</div>
                 </div>
 
-                <div class="step" onclick="goToPage('packing.php')">
+                <div class="step active" onclick="goToPage('packing.php')">
                     <div class="icon">📦</div>
                     <div class="label">Chờ đóng gói</div>
                 </div>
@@ -152,7 +152,6 @@ if (isset($_POST['update_order'])) {
                         Hủy đơn hàng
                     </button>
                 </form>
-
             </div>
             <div class="modal fade" id="editOrder">
                 <div class="modal-dialog">

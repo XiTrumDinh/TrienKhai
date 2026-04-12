@@ -51,16 +51,25 @@ if (isset($_POST['update_order'])) {
     $sql = "UPDATE orders SET phone = ?, address = ?, note = ? WHERE id = ?";
     $db->execute($sql, "sssi", [$phone, $address, $note, $order_id]);
 
-    header("Location: order_detail.php?id=" . $order_id);
+    header("Location: comment.php?id=" . $order_id);
     exit();
 }
+// ===== REVIEW (KHÔNG SQL) =====
+if (isset($_POST['submit_review'])) {
+    $_SESSION['reviews'][$order_id] = [
+        'rating' => $_POST['rating'],
+        'comment' => $_POST['comment']
+    ];
 
+    header("Location: comment.php?id=" . $order_id);
+    exit();
+}
 // ===== HỦY ĐƠN =====
 if (isset($_POST['cancel_order'])) {
     $sql = "DELETE FROM orders WHERE id = ?";
     $db->execute($sql, "i", [$order_id]);
 
-    header("Location: shipping.php");
+    header("Location: completed.php");
     exit();
 }
 ?>
@@ -75,7 +84,7 @@ if (isset($_POST['cancel_order'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="public/css/style.css">
-    <link rel="stylesheet" href="public/css/order_detail.css">
+    <link rel="stylesheet" href="public/css/comment.css">
 
 </head>
 
@@ -91,18 +100,7 @@ if (isset($_POST['cancel_order'])) {
                 Đơn hàng #<?= $order['id'] ?>
             </div>
 
-            <!-- CUSTOMER -->
-            <div class="customer-box">
-                <p><b>Tên:</b> <?= $order['name'] ?></p>
-                <p><b>SĐT:</b> <?= $order['phone'] ?></p>
-                <?php if (!empty($order['email'])): ?>
-                    <p><b>Email:</b> <?= $order['email'] ?></p>
-                <?php endif; ?>
-                <p><b>Địa chỉ:</b> <?= $order['address'] ?></p>
-                <?php if (!empty($order['note'])): ?>
-                    <p><b>Note:</b> <?= $order['note'] ?></p>
-                <?php endif; ?>
-            </div>
+
 
             <!-- STATUS -->
             <div class="order-status">
@@ -173,6 +171,65 @@ if (isset($_POST['cancel_order'])) {
                 <?php endif; ?>
 
             </div>
+            <?php if ($order['status'] == 'completed'): ?>
+
+                <?php if (isset($_SESSION['reviews'][$order_id]) && !isset($_GET['edit'])):
+                    $r = $_SESSION['reviews'][$order_id];
+                ?>
+
+                    <!-- HIỂN THỊ REVIEW -->
+                    <div class="mt-4 p-3 border rounded">
+                        <h5>Đánh giá của bạn</h5>
+
+                        <p>
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <?= $i <= $r['rating'] ? '⭐' : '☆' ?>
+                            <?php endfor; ?>
+                        </p>
+
+                        <p><?= $r['comment'] ?></p>
+
+                        <!-- NÚT SỬA -->
+                        <a href="comment.php?id=<?= $order_id ?>&edit=1" class="btn btn-primary">
+                            Sửa đánh giá
+                        </a>
+                    </div>
+
+                <?php else: ?>
+
+                    <!-- FORM (THÊM + SỬA) -->
+                    <form method="POST" class="mt-4">
+
+                        <h5>Đánh giá đơn hàng</h5>
+
+                        <?php
+                        $old = $_SESSION['reviews'][$order_id] ?? null;
+                        ?>
+
+                        <!-- STAR -->
+                        <div class="mb-3 rating">
+                            <?php for ($i = 5; $i >= 1; $i--): ?>
+                                <input type="radio" name="rating" value="<?= $i ?>" id="star<?= $i ?>"
+                                    <?= ($old && $old['rating'] == $i) ? 'checked' : '' ?>>
+                                <label for="star<?= $i ?>">★</label>
+                            <?php endfor; ?>
+                        </div>
+
+                        <!-- COMMENT -->
+                        <div class="mb-3">
+                            <label>Bình luận:</label>
+                            <textarea name="comment" class="form-control" rows="3" required><?= $old['comment'] ?? '' ?></textarea>
+                        </div>
+
+                        <button name="submit_review" class="btn btn-success">
+                            <?= $old ? 'Cập nhật' : 'Gửi đánh giá' ?>
+                        </button>
+
+                    </form>
+
+                <?php endif; ?>
+
+            <?php endif; ?>
         </div>
     </div>
     <div class="modal fade" id="editOrder">

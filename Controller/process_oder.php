@@ -38,7 +38,10 @@ foreach ($_SESSION['cart'] as $id => $qty) {
     $id = (int) $id;
     $qty = (int) $qty;
 
-    $result = $db->conn->query("SELECT price FROM products WHERE id=$id");
+    $result = $db->conn->query("SELECT p.price, c.warranty_months 
+FROM products p
+JOIN categories c ON p.category_id = c.id
+WHERE p.id = $id");
 
     if ($row = $result->fetch_assoc()) {
         $total += $row['price'] * $qty;
@@ -84,20 +87,52 @@ foreach ($_SESSION['cart'] as $id => $qty) {
 
     if ($row = $result->fetch_assoc()) {
 
-        $stmt_item = $db->conn->prepare("
-            INSERT INTO order_items (order_id, product_id, quantity, price)
-            VALUES (?, ?, ?, ?)
-        ");
+        // 🔥 Lặp theo số lượng
+        for ($i = 0; $i < $qty; $i++) {
 
-        $stmt_item->bind_param(
-            "iiid",
-            $order_id,
-            $id,
-            $qty,
-            $row['price']
-        );
+            // 👉 1 sản phẩm = 1 dòng
+            $stmt_item = $db->conn->prepare("
+                INSERT INTO order_items (order_id, product_id, quantity, price)
+                VALUES (?, ?, 1, ?)
+            ");
 
-        $stmt_item->execute();
+            $stmt_item->bind_param(
+                "iid",
+                $order_id,
+                $id,
+                $row['price']
+            );
+
+            $stmt_item->execute();
+
+            // 👉 lấy id vừa tạo
+            $order_item_id = $stmt_item->insert_id;
+
+            // ====================
+            // 👉 TẠO BẢO HÀNH
+            // ====================
+            $serial = "SN" . strtoupper(uniqid());
+
+            $start = date("Y-m-d");
+            $months = $row['warranty_months'] ?? 12;
+
+            $end = date("Y-m-d", strtotime("+$months months"));
+
+            $stmt_w = $db->conn->prepare("
+                INSERT INTO warranties (order_item_id, serial_number, warranty_start, warranty_end)
+                VALUES (?, ?, ?, ?)
+            ");
+
+            $stmt_w->bind_param(
+                "isss",
+                $order_item_id,
+                $serial,
+                $start,
+                $end
+            );
+
+            $stmt_w->execute();
+        }
     }
 }
 

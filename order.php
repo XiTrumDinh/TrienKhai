@@ -10,13 +10,13 @@ if (!isset($_SESSION["user"])) {
     exit();
 }
 
-// chỉ admin
-if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
-    header("Location: index.php");
-    exit();
-}
+
 
 require_once "Database/Database.php";
+require_once "auth.php";
+
+requireLogin();
+requireRole(["admin", "quanly"]);
 $db = new Database();
 
 // ===== GET FILTER =====
@@ -127,9 +127,16 @@ $orders = $result->fetch_all(MYSQLI_ASSOC);
                 <h6>Quản lý CRUD</h6>
                 <hr>
                 <ul class="list-unstyled">
-                    <li><a href="user.php">User</a></li>
-                    <li><a href="crud.php">Product</a></li>
-                    <li><a href="order.php" class="active">Order</a></li>
+
+                    <?php if ($_SESSION["role"] == "admin"): ?>
+                        <li><a href="user.php">User</a></li>
+                    <?php endif; ?>
+
+                    <?php if (in_array($_SESSION["role"], ["admin", "quanly"])): ?>
+                        <li><a href="crud.php">Product</a></li>
+                        <li><a href="order.php">Order</a></li>
+                    <?php endif; ?>
+
                 </ul>
             </div>
 

@@ -10,9 +10,14 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
     header("Location: index.php");
     exit();
 }
-require_once "Database/Database.php";
 
+require_once "Database/Database.php";
+require_once "auth.php";
+
+requireLogin();
+requireRole(["admin"]);
 $db = new Database();
+$roles = ["admin", "user", "quanly", "tuvan"];
 // ================= ADD =================
 if (isset($_POST["addUser"])) {
     $sql = "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)";
@@ -165,10 +170,16 @@ $users = $db->select($sql, $types, $params);
                 <h6>Quản lý CRUD</h6>
                 <hr>
                 <ul class="list-unstyled">
-                    <li><a href="user.php" class="active">User</a></li>
-                    <li><a href="crud.php">Product</a></li>
-                    <li><a href="order.php">Order</a></li>
-                    <li>.....</li>
+
+                    <?php if ($_SESSION["role"] == "admin"): ?>
+                        <li><a href="user.php">User</a></li>
+                    <?php endif; ?>
+
+                    <?php if (in_array($_SESSION["role"], ["admin", "quanly"])): ?>
+                        <li><a href="crud.php">Product</a></li>
+                        <li><a href="order.php">Order</a></li>
+                    <?php endif; ?>
+
                 </ul>
 
             </div>
@@ -203,12 +214,11 @@ $users = $db->select($sql, $types, $params);
                     <!-- FILTER LOẠI -->
                     <select id="categoryFilter" class="form-select w-auto">
                         <option value="">Tất cả</option>
-                        <option value="admin" <?= (isset($_GET['role']) && $_GET['role'] == 'admin') ? 'selected' : '' ?>>
-                            Admin
-                        </option>
-                        <option value="user" <?= (isset($_GET['role']) && $_GET['role'] == 'user') ? 'selected' : '' ?>>
-                            User
-                        </option>
+                        <?php foreach ($roles as $r): ?>
+                            <option value="<?= $r ?>" <?= ($role == $r) ? 'selected' : '' ?>>
+                                <?= ucfirst($r) ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
                         + Thêm User
@@ -260,9 +270,12 @@ $users = $db->select($sql, $types, $params);
                                                         <input type="email" name="email" class="form-control mb-2"
                                                             value="<?= $u["email"] ?>">
 
-                                                        <select name="role" class="form-control mb-2 ">
-                                                            <option value="user" <?= $u["role"] == "user" ? "selected" : "" ?>>User</option>
-                                                            <option value="admin" <?= $u["role"] == "admin" ? "selected" : "" ?>>Admin</option>
+                                                        <select name="role" class="form-control mb-2">
+                                                            <?php foreach ($roles as $r): ?>
+                                                                <option value="<?= $r ?>" <?= $u["role"] == $r ? "selected" : "" ?>>
+                                                                    <?= ucfirst($r) ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
                                                         </select>
 
                                                         <button name="updateUser" class="btn btn-primary">Cập nhật</button>
@@ -338,8 +351,9 @@ $users = $db->select($sql, $types, $params);
                 <input type="email" name="email" class="form-control mb-2" placeholder="Email" required>
 
                 <select name="role" class="form-control mb-2">
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
+                    <?php foreach ($roles as $r): ?>
+                        <option value="<?= $r ?>"><?= ucfirst($r) ?></option>
+                    <?php endforeach; ?>
                 </select>
 
                 <button name="addUser" class="btn btn-success">Thêm</button>

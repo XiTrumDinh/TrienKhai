@@ -82,8 +82,22 @@ $keyword = $_GET["keyword"] ?? "";
                 </form>
 
                 <div class="d-flex flex-column flex-lg-row gap-2">
-                    <?php if (isset($_SESSION["role"]) && $_SESSION["role"] === "admin"): ?>
-                        <a href="crud.php" class="btn btn-light">CRUD</a>
+                    <?php if (isset($_SESSION["role"])): ?>
+
+                        <!-- ADMIN -->
+                        <?php if ($_SESSION["role"] === "admin"): ?>
+                            <a href="crud.php" class="btn btn-light">CRUD</a>
+                            <a href="chat.php" class="btn btn-warning">Tư vấn</a>
+                        <?php endif; ?>
+
+                        <!-- QUANLY -->
+                        <?php if ($_SESSION["role"] === "quanly"): ?>
+                            <a href="crud.php" class="btn btn-light">CRUD</a>
+                        <?php endif; ?>
+
+                        <!-- TUVAN -->
+                        <a href="chat.php" class="btn btn-light">Tư vấn</a>
+
                     <?php endif; ?>
                     <a href="faq.php" class="btn btn-light">Về Chúng Tôi</a></a>
                     <a href="cart.php" class="btn btn-light">Giỏ hàng</a>

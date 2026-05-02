@@ -5,13 +5,12 @@ if (!isset($_SESSION["user"])) {
     exit();
 }
 
-// không phải admin -> chặn
-if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
-    header("Location: index.php");
-    exit();
-}
-require_once "Database/Database.php";
 
+require_once "Database/Database.php";
+require_once "auth.php";
+
+requireLogin();
+requireRole(["admin", "quanly"]);
 $db = new Database();
 
 // Lấy danh sách danh mục để dùng cho form Thêm/Sửa và tránh lỗi "cannot be null"
@@ -273,10 +272,16 @@ $products = $db->select($sql, $selectTypes, $selectParams);
                 <h6>Quản lý CRUD</h6>
                 <hr>
                 <ul class="list-unstyled">
-                    <li><a href="user.php">User</a></li>
-                    <li><a href="crud.php" class="active">Product</a></li>
-                    <li><a href="order.php">Order</a></li>
-                    <li>.....</li>
+
+                    <?php if ($_SESSION["role"] == "admin"): ?>
+                        <li><a href="user.php">User</a></li>
+                    <?php endif; ?>
+
+                    <?php if (in_array($_SESSION["role"], ["admin", "quanly"])): ?>
+                        <li><a href="crud.php">Product</a></li>
+                        <li><a href="order.php">Order</a></li>
+                    <?php endif; ?>
+
                 </ul>
 
             </div>

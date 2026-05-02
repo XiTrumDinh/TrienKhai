@@ -1,3 +1,37 @@
+<?php
+include_once "Database/Database.php";
+$db = new Database();
+
+$result = null;
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    $code = trim($_POST['code']);
+
+    // nếu nhập dạng DH123 → lấy số
+    if (strpos($code, 'DH') === 0) {
+        $code = str_replace('DH', '', $code);
+    }
+
+    $stmt = $db->conn->prepare("
+        SELECT w.*, p.name AS product_name, o.id AS order_id, o.created_at
+        FROM warranties w
+        JOIN order_items oi ON w.order_item_id = oi.id
+        JOIN products p ON oi.product_id = p.id
+        JOIN orders o ON oi.order_id = o.id
+        WHERE w.serial_number = ? OR o.id = ?
+    ");
+
+    $stmt->bind_param("ss", $code, $code);
+    $stmt->execute();
+
+    $res = $stmt->get_result();
+
+    if ($res->num_rows > 0) {
+        $result = $res->fetch_assoc();
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -39,42 +73,63 @@
 
             <!-- RESULT -->
             <?php if ($_SERVER["REQUEST_METHOD"] === "POST"): ?>
-                <div class="lookup-result">
 
-                    <div class="lookup-result-header">
-                        <span class="lookup-badge active">Còn bảo hành</span>
+                <?php if ($result): ?>
+
+                    <div class="lookup-result">
+
+                        <div class="lookup-result-header">
+                            <span class="lookup-badge <?= (strtotime($result['warranty_end']) > time()) ? 'active' : 'expired' ?>">
+                                <?= (strtotime($result['warranty_end']) > time()) ? 'Còn bảo hành' : 'Hết bảo hành' ?>
+                            </span>
+                        </div>
+
+                        <div class="lookup-grid">
+
+                            <div class="lookup-item">
+                                <span>Sản phẩm</span>
+                                <strong><?= $result['product_name'] ?></strong>
+                            </div>
+
+                            <div class="lookup-item">
+                                <span>Mã đơn</span>
+                                <strong>DH<?= $result['order_id'] ?></strong>
+                            </div>
+
+                            <div class="lookup-item">
+                                <span>Serial</span>
+                                <strong><?= $result['serial_number'] ?></strong>
+                            </div>
+
+                            <div class="lookup-item">
+                                <span>Ngày mua</span>
+                                <strong><?= date('d/m/Y', strtotime($result['created_at'])) ?></strong>
+                            </div>
+
+                            <div class="lookup-item">
+                                <span>Hết hạn</span>
+                                <strong><?= date('d/m/Y', strtotime($result['warranty_end'])) ?></strong>
+                            </div>
+
+                        </div>
+
                     </div>
 
-                    <div class="lookup-grid">
-                        <div class="lookup-item">
-                            <span>Sản phẩm</span>
-                            <strong>ASUS Vivobook</strong>
-                        </div>
+                <?php else: ?>
 
-                        <div class="lookup-item">
-                            <span>Mã đơn</span>
-                            <strong>DH123456</strong>
-                        </div>
-
-                        <div class="lookup-item">
-                            <span>Ngày mua</span>
-                            <strong>01/01/2026</strong>
-                        </div>
-
-                        <div class="lookup-item">
-                            <span>Hết hạn</span>
-                            <strong>01/01/2028</strong>
-                        </div>
+                    <div class="lookup-result">
+                        <p style="color:red;">❌ Không tìm thấy thông tin bảo hành</p>
                     </div>
 
-                </div>
+                <?php endif; ?>
+
             <?php endif; ?>
 
         </div>
 
     </div>
-<br>
-<br>
+    <br>
+    <br>
     <div class="container">
 
         <div class="lookup-info-wrapper">
@@ -82,7 +137,7 @@
             <div class="lookup-info-card">
                 <h5>📘 Hướng dẫn tra cứu</h5>
 
-             
+
                 <p class="lookup-desc">
                     Thực hiện theo các bước sau để kiểm tra bảo hành nhanh chóng
                 </p>

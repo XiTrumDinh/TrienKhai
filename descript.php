@@ -123,9 +123,12 @@ $total_review = $avg[0]['total'] ?? 0;
                         MUA NGAY
                     </a>
 
-                    <button class="btn btn-outline-danger px-4 py-2">
+                    <a
+                        href="chat.php?product=<?= urlencode($p['name']) ?>"
+                        class="btn btn-outline-danger px-4 py-2"
+                        style="text-decoration: none;">
                         TƯ VẤN NGAY
-                    </button>
+                    </a>
 
                 </div>
                 <div class="bg-white p-3 mt-3 rounded">

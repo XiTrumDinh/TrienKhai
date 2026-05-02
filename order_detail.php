@@ -6,12 +6,6 @@ if (!isset($_SESSION["user"])) {
     exit();
 }
 
-// chỉ admin
-if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
-    header("Location: index.php");
-    exit();
-}
-
 require_once "Database/Database.php";
 $db = new Database();
 
@@ -21,35 +15,54 @@ if (!isset($_GET['id'])) {
 }
 
 $order_id = $_GET['id'];
+$user_id = $_SESSION['id'];
+$role = $_SESSION['role'] ?? 'user';
 
 // ===== LẤY THÔNG TIN ORDER =====
-$order = $db->select(
-    "SELECT * FROM orders WHERE id = ?",
-    "i",
-    [$order_id]
-);
+if ($role === "admin") {
+    // Admin xem tất cả
+    $order = $db->select(
+        "SELECT * FROM orders WHERE id = ?",
+        "i",
+        [$order_id]
+    );
+} else {
+    // User chỉ xem đơn của mình
+    $order = $db->select(
+        "SELECT * FROM orders WHERE id = ? AND user_id = ?",
+        "ii",
+        [$order_id, $user_id]
+    );
+}
 
 if (empty($order)) {
-    die("Không tìm thấy đơn hàng");
+    die("Không có quyền xem đơn này hoặc đơn không tồn tại");
 }
 
 $order = $order[0];
 
 // ===== LẤY CHI TIẾT SẢN PHẨM =====
-$sql = "SELECT oi.*, p.name, p.image 
+$sql = "SELECT oi.*, p.name, p.image, w.serial_number
         FROM order_items oi
         JOIN products p ON oi.product_id = p.id
+        LEFT JOIN warranties w ON w.order_item_id = oi.id
         WHERE oi.order_id = ?";
 
 $items = $db->select($sql, "i", [$order_id]);
+
 // ===== UPDATE ĐƠN =====
 if (isset($_POST['update_order'])) {
     $phone = $_POST['phone'];
     $address = $_POST['address'];
     $note = $_POST['note'];
 
-    $sql = "UPDATE orders SET phone = ?, address = ?, note = ? WHERE id = ?";
-    $db->execute($sql, "sssi", [$phone, $address, $note, $order_id]);
+    if ($role === "admin") {
+        $sql = "UPDATE orders SET phone = ?, address = ?, note = ? WHERE id = ?";
+        $db->execute($sql, "sssi", [$phone, $address, $note, $order_id]);
+    } else {
+        $sql = "UPDATE orders SET phone = ?, address = ?, note = ? WHERE id = ? AND user_id = ?";
+        $db->execute($sql, "sssii", [$phone, $address, $note, $order_id, $user_id]);
+    }
 
     header("Location: order_detail.php?id=" . $order_id);
     exit();
@@ -57,8 +70,14 @@ if (isset($_POST['update_order'])) {
 
 // ===== HỦY ĐƠN =====
 if (isset($_POST['cancel_order'])) {
-    $sql = "DELETE FROM orders WHERE id = ?";
-    $db->execute($sql, "i", [$order_id]);
+
+    if ($role === "admin") {
+        $sql = "DELETE FROM orders WHERE id = ?";
+        $db->execute($sql, "i", [$order_id]);
+    } else {
+        $sql = "DELETE FROM orders WHERE id = ? AND user_id = ?";
+        $db->execute($sql, "ii", [$order_id, $user_id]);
+    }
 
     header("Location: shipping.php");
     exit();
@@ -120,6 +139,9 @@ if (isset($_POST['cancel_order'])) {
                         <div class="product-info">
                             <h5><?= $i['name'] ?></h5>
                             <span>Số lượng: x<?= $i['quantity'] ?></span>
+                            <p class="text-muted" style="font-size: 13px;">
+                                Serial: <b><?= $i['serial_number'] ?? 'Chưa có' ?></b>
+                            </p>
                         </div>
 
                         <div class="product-price">
@@ -152,7 +174,9 @@ if (isset($_POST['cancel_order'])) {
             <div class="order-actions mt-3 d-flex justify-content-end gap-2">
 
                 <!-- Luôn có nút liên hệ -->
-                <button class="btn btn-warning">
+                <button
+                    class="btn btn-warning"
+                    onclick="window.location.href='chat.php?order=<?= $order['id'] ?>'">
                     Liên Hệ
                 </button>
 

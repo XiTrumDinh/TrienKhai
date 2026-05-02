@@ -206,8 +206,9 @@ if (isset($_POST['update_order'])) {
 
                             <div class="d-flex gap-2">
 
-                                <button class="btn btn-warning" onclick="event.stopPropagation();" data-bs-toggle="modal"
-                                    data-bs-target="#editOrder">
+                                <button
+                                    class="btn btn-warning"
+                                    onclick="event.stopPropagation(); window.location.href='chat.php?order=<?= $order['id'] ?>'">
                                     Liên Hệ
                                 </button>
                                 <button

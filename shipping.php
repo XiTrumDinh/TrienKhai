@@ -169,7 +169,7 @@ if (isset($_POST['update_order'])) {
                                 <?php foreach ($items as $index => $item) {
                                     if ($index == 0)
                                         continue;
-                                    ?>
+                                ?>
 
                                     <div class="order-item small">
 
@@ -206,8 +206,9 @@ if (isset($_POST['update_order'])) {
 
                             <div class="d-flex gap-2">
 
-                                <button class="btn btn-warning" onclick="event.stopPropagation();" data-bs-toggle="modal"
-                                    data-bs-target="#editOrder">
+                                <button
+                                    class="btn btn-warning"
+                                    onclick="event.stopPropagation(); window.location.href='chat.php?order=<?= $order['id'] ?>'">
                                     Liên Hệ
                                 </button>
 
@@ -245,9 +246,11 @@ if (isset($_POST['update_order'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="public/js/footer.js"></script>
     <script src="public/js/shipping.js"></script>
-    <script>function goDetail(id) {
+    <script>
+        function goDetail(id) {
             window.location.href = "order_detail.php?id=" + id;
-        }</script>
+        }
+    </script>
 
 </body>
 

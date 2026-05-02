@@ -1,0 +1,117 @@
+/* ===== CONTACT CHAT ===== */
+
+.contact-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+/* SIDEBAR giống FAQ */
+.contact-sidebar {
+    width: 220px;
+    background: #f2f2f2;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.contact-sidebar h5 {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.contact-sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.contact-sidebar li {
+    margin-bottom: 8px;
+}
+
+.contact-sidebar a {
+    text-decoration: none;
+    color: #333;
+}
+
+.contact-sidebar li.active a,
+.contact-sidebar a:hover {
+    color: #e35d5b;
+}
+
+/* CONTENT */
+.contact-content {
+    flex: 1;
+    background: #f2f2f2;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+/* CHAT BOX */
+.chat-box {
+    background: #fff;
+    border-radius: 10px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* MESSAGES */
+.chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+/* MESSAGE */
+.message {
+    margin-bottom: 10px;
+    max-width: 70%;
+}
+
+.message span {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+/* ADMIN (trái) */
+.message.admin span {
+    background: #eee;
+}
+
+/* USER (phải) */
+.message.user {
+    margin-left: auto;
+    text-align: right;
+}
+
+.message.user span {
+    background: #e35d5b;
+    color: #fff;
+}
+
+/* INPUT */
+.chat-input {
+    display: flex;
+    border-top: 1px solid #ddd;
+}
+
+.chat-input input {
+    flex: 1;
+    border: none;
+    padding: 12px;
+    outline: none;
+}
+
+.chat-input button {
+    background: #e35d5b;
+    border: none;
+    color: #fff;
+    padding: 0 20px;
+}
+
+.chat-input button:hover {
+    background: #cc4c4a;
+}   

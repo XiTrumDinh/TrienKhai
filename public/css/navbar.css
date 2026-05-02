@@ -91,3 +91,23 @@
             /* Không cho nó tràn toàn màn hình */
         }
     }
+    .navbar img {
+    object-fit: cover;
+}
+
+.dropdown-toggle::after {
+    margin-left: 5px;
+}
+
+.dropdown-menu {
+    border-radius: 10px;
+    padding: 8px 0;
+}
+
+.dropdown-item {
+    font-size: 14px;
+}
+
+.dropdown-item:hover {
+    background: #f5f5f5;
+}

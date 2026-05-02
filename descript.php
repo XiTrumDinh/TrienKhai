@@ -99,9 +99,9 @@ $total_review = $avg[0]['total'] ?? 0;
                 <div class="bg-white p-2">
                     <span class="fs-3 fw-bold text-danger"> <?= number_format($p['old_price'], 0, ',', '.') ?> ₫</span>
                     <span class="text-decoration-line-through text-muted ms-2">
-                        <?= number_format($p['price'], 0, ',', '.') ?> ₫</span>
+                        <?= number_format($p['old_price'], 0, ',', '.') ?> ₫</span>
                     <?php
-                    $percent = round((($p['old_price'] - $p['price']) / $p['old_price']) * 100);
+                    $percent = round((($p['price'] - $p['price']) / $p['old_price']) * 100);
                     ?>
                     <span class="sale">-<?= $percent ?>%</span>
                     <div class="rating">

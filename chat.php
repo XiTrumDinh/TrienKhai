@@ -236,7 +236,7 @@ if (!empty($chat_title)) {
             while ($c = mysqli_fetch_assoc($chats)):
             ?>
                 <div>
-                    <a href="?chat_user=<?= $c['user_id'] ?>&title=<?= urlencode($c['chat_title']) ?>">
+                    <a href="?chat_user=<?= $c['user_id'] ?>&title=<?= urlencode($c['chat_title'] ?? '') ?>">
                         <?= safe($c['chat_title']) ?>
                     </a>
                 </div>

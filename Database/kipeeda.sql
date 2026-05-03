@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 02, 2026 at 01:28 PM
+-- Generation Time: May 03, 2026 at 08:21 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.4.12
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `kipeeda`
 --
+CREATE DATABASE IF NOT EXISTS `kipeeda` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE `kipeeda`;
 
 -- --------------------------------------------------------
 

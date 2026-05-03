@@ -36,36 +36,19 @@ if (!empty($_GET['product'])) {
     $chat_title = $_GET['title'];
 }
 
-/* ===== CHẶN USER TRUY CẬP LÉN ===== */
+/* ===== XỬ LÝ TRUY CẬP VÀ KHỞI TẠO CHAT ===== */
 if ($user_role === 'user' && !empty($chat_title)) {
-    $check = $conn->prepare("
-        SELECT id FROM messages
-        WHERE user_id=? AND chat_title=?
-        LIMIT 1
-    ");
+    // 1. Kiểm tra xem User hiện tại đã có tin nhắn nào trong tiêu đề này chưa
+    $check = $conn->prepare("SELECT id FROM messages WHERE user_id=? AND chat_title=? LIMIT 1");
     $check->bind_param("is", $user_id, $chat_title);
     $check->execute();
+    $has_chat = $check->get_result()->num_rows > 0;
 
-    if ($check->get_result()->num_rows == 0) {
-        echo "<script>alert('Không có quyền!');location='chat.php';</script>";
-        exit;
-    }
-}
-
-/* ===== TẠO CHAT ===== */
-if (!empty($chat_title) && $user_role === 'user') {
-    $check = $conn->prepare("
-        SELECT id FROM messages
-        WHERE user_id=? AND chat_title=?
-        LIMIT 1
-    ");
-    $check->bind_param("is", $user_id, $chat_title);
-    $check->execute();
-
-    if ($check->get_result()->num_rows == 0) {
+    // 2. Nếu chưa có, hãy tạo tin nhắn mồi (tin nhắn hệ thống hoặc tiêu đề) để khởi tạo quyền truy cập
+    if (!$has_chat) {
         $stmt = $conn->prepare("
-            INSERT INTO messages
-            (sender, message, user_id, role, sender_id, receiver_id, chat_title)
+            INSERT INTO messages 
+            (sender, message, user_id, role, sender_id, receiver_id, chat_title) 
             VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->bind_param(
@@ -263,7 +246,7 @@ if (!empty($chat_title)) {
                     : $c['username'];
             ?>
 
-                <a href="?chat_user=<?= $c['user_id'] ?>&title=<?= urlencode($c['chat_title']) ?>">
+                <a href="?chat_user=<?= $c['user_id'] ?>&title=<?= urlencode($c['chat_title'] ?? '') ?>">
                     <div style="font-weight:600"><?= safe($name) ?></div>
                     <div style="font-size:13px;color:#666"><?= safe($c['chat_title']) ?></div>
                 </a>

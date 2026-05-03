@@ -124,7 +124,7 @@ $total_review = $avg[0]['total'] ?? 0;
                     </a>
 
                     <a
-                        href="chat.php?product=<?= urlencode($p['name']) ?>"
+                        href="text.php?product=<?= urlencode($p['name']) ?>"
                         class="btn btn-outline-danger px-4 py-2"
                         style="text-decoration: none;">
                         TƯ VẤN NGAY

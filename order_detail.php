@@ -176,7 +176,7 @@ if (isset($_POST['cancel_order'])) {
                 <!-- Luôn có nút liên hệ -->
                 <button
                     class="btn btn-warning"
-                    onclick="window.location.href='chat.php?order=<?= $order['id'] ?>'">
+                    onclick="window.location.href='text.php?order=<?= $order['id'] ?>'">
                     Liên Hệ
                 </button>
 

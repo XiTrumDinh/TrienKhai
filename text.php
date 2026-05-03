@@ -1,163 +1,95 @@
 <?php
 session_start();
-include "Database/Database.php";
+include_once "Database/Database.php";
 
 $db = new Database();
 $conn = $db->getConnection();
 
-/* ===== LOGIN ===== */
+// 1. KIỂM TRA ĐĂNG NHẬP
 if (!isset($_SESSION['id'])) {
+    if (isset($_GET['load']) || isset($_POST['ajax'])) {
+        header('HTTP/1.1 401 Unauthorized');
+        exit;
+    }
     echo "<script>alert('Vui lòng đăng nhập!');window.location='login.php';</script>";
     exit;
 }
 
-$user_id   = (int) $_SESSION['id'];
+$user_id = (int) $_SESSION['id'];
 $user_role = $_SESSION['role'];
-$admin_id  = 1;
+$admin_id = 1;
 
 function safe($str)
 {
-    return htmlspecialchars($str ?? '');
+    return htmlspecialchars($str ?? '', ENT_QUOTES, 'UTF-8');
 }
 
-/* ===== USERNAME ===== */
+// 2. LẤY THÔNG TIN CƠ BẢN
 $getUser = $conn->prepare("SELECT username FROM users WHERE id=?");
 $getUser->bind_param("i", $user_id);
 $getUser->execute();
 $username = $getUser->get_result()->fetch_assoc()['username'] ?? 'Unknown';
 
-/* ===== CHAT TITLE ===== */
+// 3. KHỞI TẠO BIẾN TRÁNH LỖI UNDEFINED
 $chat_title = '';
-if (!empty($_GET['product'])) {
+$chat_with_name = ''; // Khởi tạo ngay từ đầu
+
+if (!empty($_GET['product']))
     $chat_title = "Tư vấn sản phẩm: " . $_GET['product'];
-} elseif (!empty($_GET['order'])) {
+elseif (!empty($_GET['order']))
     $chat_title = "Hỗ trợ đơn hàng: #" . $_GET['order'];
-} elseif (!empty($_GET['title'])) {
+elseif (!empty($_GET['title']))
     $chat_title = $_GET['title'];
-}
 
-/* ===== XỬ LÝ TRUY CẬP VÀ KHỞI TẠO CHAT ===== */
-if ($user_role === 'user' && !empty($chat_title)) {
-    // 1. Kiểm tra xem User hiện tại đã có tin nhắn nào trong tiêu đề này chưa
-    $check = $conn->prepare("SELECT id FROM messages WHERE user_id=? AND chat_title=? LIMIT 1");
-    $check->bind_param("is", $user_id, $chat_title);
-    $check->execute();
-    $has_chat = $check->get_result()->num_rows > 0;
-
-    // 2. Nếu chưa có, hãy tạo tin nhắn mồi (tin nhắn hệ thống hoặc tiêu đề) để khởi tạo quyền truy cập
-    if (!$has_chat) {
-        $stmt = $conn->prepare("
-            INSERT INTO messages 
-            (sender, message, user_id, role, sender_id, receiver_id, chat_title) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ");
-        $stmt->bind_param(
-            "ssisiss",
-            $username,
-            $chat_title,
-            $user_id,
-            $user_role,
-            $user_id,
-            $admin_id,
-            $chat_title
-        );
-        $stmt->execute();
+// 4. XỬ LÝ LOGIC TÊN NGƯỜI CHAT (Để dùng cho giao diện)
+if (!empty($chat_title)) {
+    if (in_array($user_role, ['admin', 'tuvan'])) {
+        $target_user_id = (int) ($_GET['chat_user'] ?? 0);
+        $stmt_n = $conn->prepare("SELECT username FROM users WHERE id=?");
+        $stmt_n->bind_param("i", $target_user_id);
+    } else {
+        $stmt_n = $conn->prepare("SELECT sender FROM messages WHERE chat_title=? AND user_id=? AND sender_id != ? ORDER BY created_at DESC LIMIT 1");
+        $stmt_n->bind_param("sii", $chat_title, $user_id, $user_id);
     }
+    $stmt_n->execute();
+    $r_n = $stmt_n->get_result()->fetch_assoc();
+    $chat_with_name = $r_n['username'] ?? $r_n['sender'] ?? '';
 }
 
-/* ===== SEND ===== */
+// 5. XỬ LÝ AJAX SEND (Nếu có AJAX thì thực hiện xong rồi EXIT ngay)
 if (isset($_POST['ajax']) && $_POST['ajax'] === 'send') {
-
     $msg = trim($_POST['message'] ?? '');
     $title = $_POST['title'] ?? '';
-    if ($msg === '') exit;
-
-    if ($user_role === 'user') {
-        $receiver = $admin_id;
-        $chat_uid = $user_id;
-
-        $check = $conn->prepare("
-            SELECT id FROM messages WHERE user_id=? AND chat_title=?
-        ");
-        $check->bind_param("is", $user_id, $title);
-        $check->execute();
-        if ($check->get_result()->num_rows == 0) exit;
-    } else {
-        $receiver = (int)($_POST['receiver_id'] ?? 0);
-        if ($receiver <= 0) exit;
-        $chat_uid = $receiver;
+    if ($msg !== '') {
+        $chat_uid = ($user_role === 'user') ? $user_id : (int) ($_POST['receiver_id'] ?? 0);
+        $receiver = ($user_role === 'user') ? $admin_id : $chat_uid;
+        if ($chat_uid > 0) {
+            $stmt = $conn->prepare("INSERT INTO messages (sender, message, user_id, role, sender_id, receiver_id, chat_title) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssisiss", $username, $msg, $chat_uid, $user_role, $user_id, $receiver, $title);
+            $stmt->execute();
+        }
     }
-
-    $stmt = $conn->prepare("
-        INSERT INTO messages
-        (sender, message, user_id, role, sender_id, receiver_id, chat_title)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ");
-    $stmt->bind_param(
-        "ssisiss",
-        $username,
-        $msg,
-        $chat_uid,
-        $user_role,
-        $user_id,
-        $receiver,
-        $title
-    );
-    $stmt->execute();
     exit;
 }
 
-/* ===== LOAD ===== */
+// 6. XỬ LÝ AJAX LOAD (Tương tự, EXIT sau khi echo)
 if (isset($_GET['load'])) {
-
     $title = $_GET['title'] ?? '';
-
     if (in_array($user_role, ['admin', 'tuvan'])) {
-
-        $chat_user = (int)($_GET['chat_user'] ?? 0);
-
-        $stmt = $conn->prepare("
-            SELECT * FROM messages
-            WHERE chat_title=? AND user_id=?   -- 🔥 FIX TRỘN CHAT
-            ORDER BY created_at ASC
-        ");
+        $chat_user = (int) ($_GET['chat_user'] ?? 0);
+        $stmt = $conn->prepare("SELECT * FROM messages WHERE chat_title=? AND user_id=? ORDER BY created_at ASC");
         $stmt->bind_param("si", $title, $chat_user);
     } else {
-        // Dành cho USER: Lấy tất cả tin nhắn của cuộc hội thoại này dựa trên user_id và chat_title
-        $stmt = $conn->prepare("
-        SELECT * FROM messages
-        WHERE user_id=? AND chat_title=?
-        ORDER BY created_at ASC
-    ");
+        $stmt = $conn->prepare("SELECT * FROM messages WHERE user_id=? AND chat_title=? ORDER BY created_at ASC");
         $stmt->bind_param("is", $user_id, $title);
     }
-
     $stmt->execute();
     $res = $stmt->get_result();
-
     while ($row = $res->fetch_assoc()) {
         $class = ($row['sender_id'] == $user_id) ? 'user' : 'admin';
-        echo "<div class='message $class'>
-                <b>" . safe($row['sender']) . ":</b>
-                <span>" . safe($row['message']) . "</span>
-              </div>";
+        echo "<div class='message $class'><b>" . safe($row['sender']) . ":</b> <span>" . safe($row['message']) . "</span></div>";
     }
     exit;
-}
-
-/* ===== CHAT NAME ===== */
-$chat_with_name = '';
-if (!empty($chat_title)) {
-    $stmt = $conn->prepare("
-        SELECT sender FROM messages
-        WHERE chat_title=? AND user_id=? AND sender_id != ?
-        ORDER BY created_at DESC LIMIT 1
-    ");
-    // $user_id ở đây là ID của chính User đang đăng nhập
-    $stmt->bind_param("sii", $chat_title, $user_id, $user_id);
-    $stmt->execute();
-    $r = $stmt->get_result()->fetch_assoc();
-    if ($r) $chat_with_name = $r['sender'];
 }
 ?>
 
@@ -171,7 +103,7 @@ if (!empty($chat_title)) {
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="public/css/style.css">
-    <link rel="stylesheet" href="public/css/chat.css">
+    <link rel="stylesheet" href="public/css/text.css">
 </head>
 
 <body>
@@ -244,7 +176,7 @@ if (!empty($chat_title)) {
                 $name = ($user_role === 'user')
                     ? ($c['staff_name'] ?: 'Chưa phản hồi')
                     : $c['username'];
-            ?>
+                ?>
 
                 <a href="?chat_user=<?= $c['user_id'] ?>&title=<?= urlencode($c['chat_title'] ?? '') ?>">
                     <div style="font-weight:600"><?= safe($name) ?></div>
@@ -258,7 +190,7 @@ if (!empty($chat_title)) {
         <div class="contact-content">
             <h4>Liên hệ hỗ trợ</h4>
 
-            <?php if ($chat_with_name): ?>
+            <?php if (!empty($chat_with_name)): ?>
                 <div style="margin-bottom:10px; font-weight:500; color:#555;">
                     Đang chat với: <b><?= safe($chat_with_name) ?></b>
                 </div>
@@ -271,8 +203,7 @@ if (!empty($chat_title)) {
                     <input type="text" id="message" placeholder="Nhập tin nhắn..." required>
 
                     <?php if (in_array($user_role, ['admin', 'tuvan'])): ?>
-                        <input type="hidden" id="receiver_id"
-                            value="<?= (int) ($_GET['chat_user'] ?? 0) ?>">
+                        <input type="hidden" id="receiver_id" value="<?= (int) ($_GET['chat_user'] ?? 0) ?>">
                     <?php endif; ?>
 
                     <button type="submit">Gửi</button>
@@ -286,7 +217,7 @@ if (!empty($chat_title)) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="public/js/footer.js"></script>
-    <script src="public/js/chat.js"></script>
+    <script src="public/js/text.js"></script>
 
 </body>
 

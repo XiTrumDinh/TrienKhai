@@ -7,10 +7,7 @@ $conn = $db->getConnection();
 
 /* ===== LOGIN ===== */
 if (!isset($_SESSION['id'])) {
-    echo "<script>
-        alert('Vui lòng đăng nhập!');
-        window.location='login.php';
-    </script>";
+    echo "<script>alert('Vui lòng đăng nhập!');window.location='login.php';</script>";
     exit;
 }
 
@@ -18,22 +15,19 @@ $user_id   = (int) $_SESSION['id'];
 $user_role = $_SESSION['role'];
 $admin_id  = 1;
 
-/* ===== HELPER ===== */
 function safe($str)
 {
     return htmlspecialchars($str ?? '');
 }
 
-/* ===== LẤY USERNAME ===== */
+/* ===== USERNAME ===== */
 $getUser = $conn->prepare("SELECT username FROM users WHERE id=?");
 $getUser->bind_param("i", $user_id);
 $getUser->execute();
-$userData = $getUser->get_result()->fetch_assoc();
-$username = $userData['username'] ?? 'Unknown';
+$username = $getUser->get_result()->fetch_assoc()['username'] ?? 'Unknown';
 
 /* ===== CHAT TITLE ===== */
 $chat_title = '';
-
 if (!empty($_GET['product'])) {
     $chat_title = "Tư vấn sản phẩm: " . $_GET['product'];
 } elseif (!empty($_GET['order'])) {
@@ -42,25 +36,38 @@ if (!empty($_GET['product'])) {
     $chat_title = $_GET['title'];
 }
 
-/* ===== TẠO CHAT (CHỈ USER) ===== */
-if (!empty($chat_title) && $user_role === 'user') {
-
+/* ===== CHẶN USER TRUY CẬP LÉN ===== */
+if ($user_role === 'user' && !empty($chat_title)) {
     $check = $conn->prepare("
         SELECT id FROM messages
-        WHERE user_id = ? AND chat_title = ?
+        WHERE user_id=? AND chat_title=?
         LIMIT 1
     ");
     $check->bind_param("is", $user_id, $chat_title);
     $check->execute();
 
     if ($check->get_result()->num_rows == 0) {
+        echo "<script>alert('Không có quyền!');location='chat.php';</script>";
+        exit;
+    }
+}
 
+/* ===== TẠO CHAT ===== */
+if (!empty($chat_title) && $user_role === 'user') {
+    $check = $conn->prepare("
+        SELECT id FROM messages
+        WHERE user_id=? AND chat_title=?
+        LIMIT 1
+    ");
+    $check->bind_param("is", $user_id, $chat_title);
+    $check->execute();
+
+    if ($check->get_result()->num_rows == 0) {
         $stmt = $conn->prepare("
             INSERT INTO messages
             (sender, message, user_id, role, sender_id, receiver_id, chat_title)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
-
         $stmt->bind_param(
             "ssisiss",
             $username,
@@ -71,32 +78,31 @@ if (!empty($chat_title) && $user_role === 'user') {
             $admin_id,
             $chat_title
         );
-
         $stmt->execute();
-        $stmt->close();
     }
-
-    $check->close();
 }
 
-/* ===== SEND MESSAGE ===== */
+/* ===== SEND ===== */
 if (isset($_POST['ajax']) && $_POST['ajax'] === 'send') {
 
-    $message = trim($_POST['message'] ?? '');
-    $chat_title_send = $_POST['title'] ?? '';
-
-    if ($message === '') exit;
-
-    $sender = $username;
+    $msg = trim($_POST['message'] ?? '');
+    $title = $_POST['title'] ?? '';
+    if ($msg === '') exit;
 
     if ($user_role === 'user') {
-        $receiver_id = $admin_id;
-        $chat_user_id = $user_id; // user gửi
-    } else {
-        $receiver_id = (int) ($_POST['receiver_id'] ?? 0);
-        if ($receiver_id <= 0) exit;
+        $receiver = $admin_id;
+        $chat_uid = $user_id;
 
-        $chat_user_id = $receiver_id; // 🔥 FIX CHÍNH Ở ĐÂY
+        $check = $conn->prepare("
+            SELECT id FROM messages WHERE user_id=? AND chat_title=?
+        ");
+        $check->bind_param("is", $user_id, $title);
+        $check->execute();
+        if ($check->get_result()->num_rows == 0) exit;
+    } else {
+        $receiver = (int)($_POST['receiver_id'] ?? 0);
+        if ($receiver <= 0) exit;
+        $chat_uid = $receiver;
     }
 
     $stmt = $conn->prepare("
@@ -104,86 +110,72 @@ if (isset($_POST['ajax']) && $_POST['ajax'] === 'send') {
         (sender, message, user_id, role, sender_id, receiver_id, chat_title)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     ");
-
     $stmt->bind_param(
         "ssisiss",
-        $sender,
-        $message,
-        $chat_user_id, // 👈 QUAN TRỌNG
+        $username,
+        $msg,
+        $chat_uid,
         $user_role,
         $user_id,
-        $receiver_id,
-        $chat_title_send
+        $receiver,
+        $title
     );
-
     $stmt->execute();
-    $stmt->close();
     exit;
 }
 
-/* ===== LOAD MESSAGE ===== */
+/* ===== LOAD ===== */
 if (isset($_GET['load'])) {
 
     $title = $_GET['title'] ?? '';
 
     if (in_array($user_role, ['admin', 'tuvan'])) {
 
+        $chat_user = (int)($_GET['chat_user'] ?? 0);
+
         $stmt = $conn->prepare("
             SELECT * FROM messages
-            WHERE chat_title=?
+            WHERE chat_title=? AND user_id=?   -- 🔥 FIX TRỘN CHAT
             ORDER BY created_at ASC
         ");
-
-        $stmt->bind_param("s", $title);
+        $stmt->bind_param("si", $title, $chat_user);
     } else {
 
         $stmt = $conn->prepare("
             SELECT * FROM messages
-            WHERE user_id=? AND chat_title=?
+            WHERE user_id=? AND chat_title=? AND receiver_id=?
             ORDER BY created_at ASC
         ");
-
-        $stmt->bind_param("is", $user_id, $title);
+        $stmt->bind_param("isi", $user_id, $title, $admin_id);
     }
 
     $stmt->execute();
     $res = $stmt->get_result();
 
     while ($row = $res->fetch_assoc()) {
-
         $class = ($row['sender_id'] == $user_id) ? 'user' : 'admin';
-
         echo "<div class='message $class'>
                 <b>" . safe($row['sender']) . ":</b>
                 <span>" . safe($row['message']) . "</span>
               </div>";
     }
-
-    $stmt->close();
     exit;
 }
-$chat_with_name = '';
 
+/* ===== CHAT NAME ===== */
+$chat_with_name = '';
 if (!empty($chat_title)) {
 
-    // lấy tin nhắn mới nhất KHÔNG phải của mình
     $stmt = $conn->prepare("
-        SELECT sender 
-        FROM messages
-        WHERE chat_title = ? 
-        AND sender_id != ?
-        ORDER BY created_at DESC
-        LIMIT 1
+        SELECT sender FROM messages
+        WHERE chat_title=? AND sender_id!=? AND user_id=?
+        ORDER BY created_at DESC LIMIT 1
     ");
-
-    $stmt->bind_param("si", $chat_title, $user_id);
+    $stmt->bind_param("sii", $chat_title, $user_id, $user_id);
     $stmt->execute();
 
-    $res = $stmt->get_result()->fetch_assoc();
-
-    if ($res) {
-        $chat_with_name = $res['sender']; // 👈 người đang chat
-    }
+    $r = $stmt->get_result()->fetch_assoc();
+    if ($r) $chat_with_name = $r['sender'];
 }
 ?>
 
@@ -215,9 +207,25 @@ if (!empty($chat_title)) {
                 echo "<h6>Danh sách chat</h6>";
 
                 $chats = mysqli_query($conn, "
-        SELECT user_id, chat_title, MAX(created_at) as last_time
-        FROM messages
-        GROUP BY user_id, chat_title
+        SELECT 
+            m.user_id,
+            m.chat_title,
+            u.username,
+
+            (
+                SELECT sender FROM messages
+                WHERE chat_title = m.chat_title
+                AND user_id = m.user_id  -- 🔥 FIX QUAN TRỌNG
+                AND sender_id != m.user_id
+                ORDER BY created_at DESC LIMIT 1
+            ) AS staff_name,
+
+            MAX(m.created_at) as last_time
+
+        FROM messages m
+        JOIN users u ON u.id = m.user_id
+
+        GROUP BY m.user_id, m.chat_title, u.username
         ORDER BY last_time DESC
     ");
             } else {
@@ -225,21 +233,42 @@ if (!empty($chat_title)) {
                 echo "<h6>Chat của bạn</h6>";
 
                 $chats = mysqli_query($conn, "
-        SELECT user_id, chat_title, MAX(created_at) as last_time
-        FROM messages
-        WHERE user_id = $user_id
-        GROUP BY user_id, chat_title
+        SELECT 
+            m.user_id,
+            m.chat_title,
+            u.username,
+
+            (
+                SELECT sender FROM messages
+                WHERE chat_title = m.chat_title
+                AND user_id = m.user_id
+                AND sender_id != m.user_id
+                ORDER BY created_at DESC LIMIT 1
+            ) AS staff_name,
+
+            MAX(m.created_at) as last_time
+
+        FROM messages m
+        JOIN users u ON u.id = m.user_id
+
+        WHERE m.user_id = $user_id
+        GROUP BY m.user_id, m.chat_title, u.username
         ORDER BY last_time DESC
     ");
             }
 
             while ($c = mysqli_fetch_assoc($chats)):
+
+                $name = ($user_role === 'user')
+                    ? ($c['staff_name'] ?: 'Chưa phản hồi')
+                    : $c['username'];
             ?>
-                <div>
-                    <a href="?chat_user=<?= $c['user_id'] ?>&title=<?= urlencode($c['chat_title'] ?? '') ?>">
-                        <?= safe($c['chat_title']) ?>
-                    </a>
-                </div>
+
+                <a href="?chat_user=<?= $c['user_id'] ?>&title=<?= urlencode($c['chat_title']) ?>">
+                    <div style="font-weight:600"><?= safe($name) ?></div>
+                    <div style="font-size:13px;color:#666"><?= safe($c['chat_title']) ?></div>
+                </a>
+
             <?php endwhile; ?>
         </div>
 
@@ -252,8 +281,8 @@ if (!empty($chat_title)) {
                     Đang chat với: <b><?= safe($chat_with_name) ?></b>
                 </div>
             <?php endif; ?>
-            <div class="chat-box">
 
+            <div class="chat-box">
                 <div class="chat-messages" id="chatMessages"></div>
 
                 <form id="chatForm" class="chat-input">
@@ -266,9 +295,9 @@ if (!empty($chat_title)) {
 
                     <button type="submit">Gửi</button>
                 </form>
-
             </div>
         </div>
+
     </div>
 
     <?php include "footer.php"; ?>

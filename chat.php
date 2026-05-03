@@ -140,13 +140,13 @@ if (isset($_GET['load'])) {
         ");
         $stmt->bind_param("si", $title, $chat_user);
     } else {
-
+        // Dành cho USER: Lấy tất cả tin nhắn của cuộc hội thoại này dựa trên user_id và chat_title
         $stmt = $conn->prepare("
-            SELECT * FROM messages
-            WHERE user_id=? AND chat_title=? AND receiver_id=?
-            ORDER BY created_at ASC
-        ");
-        $stmt->bind_param("isi", $user_id, $title, $admin_id);
+        SELECT * FROM messages
+        WHERE user_id=? AND chat_title=?
+        ORDER BY created_at ASC
+    ");
+        $stmt->bind_param("is", $user_id, $title);
     }
 
     $stmt->execute();
@@ -165,15 +165,14 @@ if (isset($_GET['load'])) {
 /* ===== CHAT NAME ===== */
 $chat_with_name = '';
 if (!empty($chat_title)) {
-
     $stmt = $conn->prepare("
         SELECT sender FROM messages
-        WHERE chat_title=? AND sender_id!=? AND user_id=?
+        WHERE chat_title=? AND user_id=? AND sender_id != ?
         ORDER BY created_at DESC LIMIT 1
     ");
+    // $user_id ở đây là ID của chính User đang đăng nhập
     $stmt->bind_param("sii", $chat_title, $user_id, $user_id);
     $stmt->execute();
-
     $r = $stmt->get_result()->fetch_assoc();
     if ($r) $chat_with_name = $r['sender'];
 }

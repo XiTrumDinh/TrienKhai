@@ -84,19 +84,20 @@ $keyword = $_GET["keyword"] ?? "";
                 <div class="d-flex flex-column flex-lg-row gap-2">
                     <?php if (isset($_SESSION["role"])): ?>
 
-                        <!-- ADMIN -->
                         <?php if ($_SESSION["role"] === "admin"): ?>
+                            <!-- Admin thấy CRUD và nút Tư vấn nổi bật -->
                             <a href="crud.php" class="btn btn-light">CRUD</a>
                             <a href="chat.php" class="btn btn-warning">Tư vấn</a>
-                        <?php endif; ?>
 
-                        <!-- QUANLY -->
-                        <?php if ($_SESSION["role"] === "quanly"): ?>
+                        <?php elseif ($_SESSION["role"] === "quanly"): ?>
+                            <!-- Quản lý thấy CRUD và nút Tư vấn bình thường -->
                             <a href="crud.php" class="btn btn-light">CRUD</a>
-                        <?php endif; ?>
+                            <a href="chat.php" class="btn btn-light">Tư vấn</a>
 
-                        <!-- TUVAN -->
-                        <a href="chat.php" class="btn btn-light">Tư vấn</a>
+                        <?php else: ?>
+                            <!-- Các role khác (như nhân viên tư vấn hoặc user) chỉ thấy nút Tư vấn -->
+                            <a href="chat.php" class="btn btn-light">Tư vấn</a>
+                        <?php endif; ?>
 
                     <?php endif; ?>
                     <a href="faq.php" class="btn btn-light">Về Chúng Tôi</a></a>

@@ -101,7 +101,6 @@ $keyword = $_GET["keyword"] ?? "";
 
                     <?php endif; ?>
                     <a href="faq.php" class="btn btn-light">Về Chúng Tôi</a></a>
-                    <a href="cart.php" class="btn btn-light">Giỏ hàng</a>
 
                     <?php if (isset($_SESSION["user"])): ?>
 
@@ -117,11 +116,20 @@ $keyword = $_GET["keyword"] ?? "";
                             <ul class="dropdown-menu dropdown-menu-end">
 
                                 <li>
-                                    <a class="dropdown-item" href="CRUD.php">
+                                    <a class="dropdown-item" href="profile.php">
                                         👤 <span><?= $_SESSION["user"] ?></span>
                                     </a>
                                 </li>
-
+                                <li>
+                                    <a class="dropdown-item" href="news.php">
+                                        📰 Tin tức
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="cart.php">
+                                        🛒 Giỏ hàng
+                                    </a>
+                                </li>
                                 <li>
                                     <a class="dropdown-item" href="shipping.php">
                                         📦 Đơn mua

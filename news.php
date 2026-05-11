@@ -1,21 +1,41 @@
+<?php
+require_once "Database/Database.php";
+
+$db = new Database();
+
+$allNews = $db->select("
+    SELECT news.*, users.fullname
+    FROM news
+    JOIN users ON news.author_id = users.id
+    ORDER BY news.created_at DESC
+");
+
+$hero = $allNews[0] ?? null;
+$sideNews = array_slice($allNews, 1, 3);
+$cards = array_slice($allNews, 4);
+
+function safeImg($img)
+{
+    return !empty($img)
+        ? htmlspecialchars($img)
+        : "public/uploads/default.jpg";
+}
+?>
+
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tin Công Nghệ</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-
-    <link rel="stylesheet"
-        href="public/css/news.css">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="public/css/news.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="public/css/style.css">
 </head>
 
 <body>
@@ -23,464 +43,350 @@
     <?php include "navbar.php"; ?>
 
     <!-- HERO -->
-
     <section class="hero-news">
-
         <div class="container">
 
             <div class="hero-grid">
 
-                <!-- BIG ARTICLE -->
+                <?php if ($hero): ?>
+                    <div class="hero-main news-open"
+                        data-title="<?= htmlspecialchars($hero['title'], ENT_QUOTES) ?>"
+                        data-content="<?= htmlspecialchars($hero['content'] ?? '', ENT_QUOTES) ?>"
+                        data-author="<?= htmlspecialchars($hero['fullname'], ENT_QUOTES) ?>">
 
-                <div class="hero-main news-open"
+                        <img src="<?= safeImg($hero['cover_image']) ?>">
 
-                    data-title="AI đang thay đổi ngành công nghệ như thế nào?"
+                        <div class="hero-overlay">
+                            <span class="hero-tag">
+                                <?= htmlspecialchars($hero['category']) ?>
+                            </span>
 
-                    data-content='
+                            <h1 class="hero-title">
+                                <?= htmlspecialchars($hero['title']) ?>
+                            </h1>
 
-                    <img class="article-cover"
-                    src="https://images.unsplash.com/photo-1518770660439-4636190af475">
+                            <p class="hero-excerpt">
+                                <?= htmlspecialchars(mb_strimwidth($hero['excerpt'] ?? '', 0, 120, '...')) ?>
 
-                    <div class="article-meta">
+                            </p>
 
-                        <span class="badge bg-primary">
-                            AI
-                        </span>
-
-                        <span>
-                            • 5 phút đọc
-                        </span>
-
-                        <span>
-                            • Hôm nay
-                        </span>
-
+                            <small class="news-author">
+                                Đăng bởi <?= htmlspecialchars($hero['fullname']) ?>
+                            </small>
+                        </div>
                     </div>
-
-                    <p>
-                        AI hiện đang trở thành trung tâm của mọi thiết bị công nghệ hiện đại.
-                    </p>
-
-                    '>
-
-                    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475">
-
-                    <div class="hero-overlay">
-
-                        <span class="hero-tag">
-                            AI
-                        </span>
-
-                        <h1>
-                            AI đang thay đổi ngành công nghệ như thế nào?
-                        </h1>
-
-                        <p>
-                            Công nghệ AI đang bùng nổ trên smartphone, laptop và phần mềm.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <!-- SIDE -->
+                <?php endif; ?>
 
                 <div class="hero-side">
+                    <?php foreach ($sideNews as $news): ?>
+                        <div class="side-news news-open"
+                            data-title="<?= htmlspecialchars($news['title'], ENT_QUOTES) ?>"
+                            data-content="<?= htmlspecialchars($news['content'] ?? '', ENT_QUOTES) ?>"
+                            data-author="<?= htmlspecialchars($news['fullname'], ENT_QUOTES) ?>">
 
-                    <div class="side-news">
+                            <img src="<?= safeImg($news['cover_image']) ?>">
 
-                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085">
+                            <div>
+                                <span><?= htmlspecialchars($news['category']) ?></span>
+                                <h4><?= htmlspecialchars($news['title']) ?></h4>
 
-                        <div>
-
-                            <span>
-                                Laptop
-                            </span>
-
-                            <h4>
-                                Xu hướng laptop gaming năm 2026
-                            </h4>
-
+                                <small class="news-author">
+                                    <?= htmlspecialchars($news['fullname']) ?>
+                                </small>
+                            </div>
                         </div>
-
-                    </div>
-
-                    <div class="side-news">
-
-                        <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9">
-
-                        <div>
-
-                            <span>
-                                Smartphone
-                            </span>
-
-                            <h4>
-                                Smartphone AI đang phát triển mạnh
-                            </h4>
-
-                        </div>
-
-                    </div>
-
-                    <div class="side-news">
-
-                        <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d">
-
-                        <div>
-
-                            <span>
-                                Công nghệ
-                            </span>
-
-                            <h4>
-                                Chip 2nm sẽ xuất hiện vào năm sau
-                            </h4>
-
-                        </div>
-
-                    </div>
-
+                    <?php endforeach; ?>
                 </div>
 
             </div>
 
         </div>
-
     </section>
 
     <!-- NEWS GRID -->
-
     <section class="news-section">
-
         <div class="container">
 
             <div class="section-title">
-
-                <h2>
-                    Tin mới nhất
-                </h2>
-
+                <h2>Tin mới nhất</h2>
             </div>
 
             <div class="news-grid">
 
-                <!-- CARD -->
+                <?php foreach ($cards as $news): ?>
+                    <div class="news-card news-open"
+                        data-title="<?= htmlspecialchars($news['title'], ENT_QUOTES) ?>"
+                        data-content="<?= htmlspecialchars($news['content'] ?? '', ENT_QUOTES) ?>"
+                        data-author="<?= htmlspecialchars($news['fullname'], ENT_QUOTES) ?>">
 
-                <div class="news-card">
+                        <img src="<?= safeImg($news['cover_image']) ?>">
 
-                    <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085">
+                        <div class="news-card-body">
+                            <span><?= htmlspecialchars($news['category']) ?></span>
 
-                    <div class="news-card-body">
+                            <h3>
+                                <?= htmlspecialchars($news['title']) ?>
+                            </h3>
 
-                        <span>
-                            Laptop
-                        </span>
+                            <p>
+                                <?= htmlspecialchars($news['excerpt']) ?>
+                            </p>
 
-                        <h3>
-                            GPU mới đang thay đổi gaming laptop
-                        </h3>
-
-                        <p>
-                            AI optimization và DLSS đang tăng FPS đáng kể.
-                        </p>
-
+                            <small class="news-author">
+                                <?= htmlspecialchars($news['fullname']) ?>
+                            </small>
+                        </div>
                     </div>
-
-                </div>
-
-                <!-- CARD -->
-
-                <div class="news-card">
-
-                    <img src="https://images.unsplash.com/photo-1517336714739-489689fd1ca8">
-
-                    <div class="news-card-body">
-
-                        <span>
-                            Gaming
-                        </span>
-
-                        <h3>
-                            Gaming handheld quay trở lại
-                        </h3>
-
-                        <p>
-                            Steam Deck và ASUS ROG Ally đang cực hot.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <!-- CARD -->
-
-                <div class="news-card">
-
-                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3">
-
-                    <div class="news-card-body">
-
-                        <span>
-                            AI
-                        </span>
-
-                        <h3>
-                            AI chatbot sẽ thay đổi internet?
-                        </h3>
-
-                        <p>
-                            Các công cụ AI đang thay đổi cách tìm kiếm thông tin.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <!-- CARD -->
-
-                <div class="news-card">
-
-                    <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5">
-
-                    <div class="news-card-body">
-
-                        <span>
-                            Security
-                        </span>
-
-                        <h3>
-                            An ninh mạng đang trở nên quan trọng hơn
-                        </h3>
-
-                        <p>
-                            Hacker AI bắt đầu trở thành mối nguy mới.
-                        </p>
-
-                    </div>
-
-                </div>
+                <?php endforeach; ?>
 
             </div>
 
         </div>
-
     </section>
 
-    <!-- MODAL -->
-
-    <div class="modal fade"
-        id="newsModal"
-        tabindex="-1">
-
+    <!-- ADD NEWS MODAL -->
+    <div class="modal fade" id="addNewsModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-
             <div class="modal-content">
 
-                <div class="modal-header">
+                <form action="Controller/save_news.php"
+                    method="POST"
+                    enctype="multipart/form-data">
 
-                    <h3 class="modal-title"
-                        id="modalTitle"></h3>
+                    <div class="modal-header">
+                        <h3 class="modal-title">Thêm bài viết</h3>
 
-                    <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                    </button>
+                        <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                    </div>
 
-                </div>
+                    <div class="modal-body">
 
-                <div class="modal-body article-modal-body">
+                        <div class="row g-4">
 
-                    <div id="modalArticleContent">
+                            <!-- LEFT -->
+                            <div class="col-lg-8">
+
+                                <div class="mb-4">
+                                    <label>Tiêu đề</label>
+
+                                    <input type="text"
+                                        name="title"
+                                        class="form-control"
+                                        required>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label>Mở bài</label>
+
+                                    <textarea name="excerpt"
+                                        class="form-control"
+                                        rows="4"
+                                        required></textarea>
+                                </div>
+
+                                <div class="mb-2 d-flex justify-content-between align-items-center">
+                                    <label>Nội dung</label>
+
+                                    <input type="file"
+                                        id="inlineImage"
+                                        accept="image/*"
+                                        style="display:none"
+                                        onchange="insertUploadedImage(this)">
+
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-primary"
+                                        onclick="document.getElementById('inlineImage').click()">
+                                        Chèn ảnh
+                                    </button>
+                                </div>
+
+                                <div class="mb-4">
+                                    <textarea id="contentBox"
+                                        name="content"
+                                        class="form-control"
+                                        rows="12"
+                                        required></textarea>
+                                </div>
+
+                            </div>
+
+                            <!-- RIGHT -->
+                            <div class="col-lg-4">
+
+                                <div class="mb-4">
+                                    <label>Thể loại</label>
+
+                                    <select name="category" class="form-select">
+                                        <option>AI</option>
+                                        <option>Smartphone</option>
+                                        <option>Laptop</option>
+                                        <option>Gaming</option>
+                                        <option>Security</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label>Ảnh cover</label>
+
+                                    <input type="file"
+                                        name="cover_file"
+                                        class="form-control"
+                                        accept="image/*"
+                                        required>
+                                </div>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
-                </div>
+                    <div class="modal-footer">
+
+                        <button type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal">
+                            Hủy
+                        </button>
+
+                        <button type="submit"
+                            class="btn btn-primary">
+                            Đăng bài
+                        </button>
+
+                    </div>
+
+                </form>
 
             </div>
-
         </div>
-
     </div>
 
-    <!-- FLOATING BUTTON -->
-
+    <!-- FLOAT BUTTON -->
     <button class="add-news-btn"
         data-bs-toggle="modal"
         data-bs-target="#addNewsModal">
-
         +
-
     </button>
-    <!-- ADD NEWS MODAL -->
 
-    <div class="modal fade"
-        id="addNewsModal"
-        tabindex="-1">
-
+    <!-- NEWS DETAIL MODAL -->
+    <div class="modal fade" id="newsModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-
             <div class="modal-content">
 
                 <div class="modal-header">
-
-                    <h3 class="modal-title">
-                        Thêm bài viết
-                    </h3>
+                    <h3 class="modal-title" id="modalTitle"></h3>
 
                     <button type="button"
                         class="btn-close"
-                        data-bs-dismiss="modal">
-                    </button>
-
+                        data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
 
-                    <div class="row g-4">
+                    <p>
+                        <small class="text-muted" id="modalAuthor"></small>
+                    </p>
 
-                        <!-- LEFT -->
+                    <hr>
 
-                        <div class="col-lg-8">
-
-                            <div class="mb-4">
-
-                                <label class="form-label">
-                                    Tiêu đề
-                                </label>
-
-                                <input type="text"
-                                    class="form-control form-control-lg"
-                                    placeholder="Nhập tiêu đề">
-
-                            </div>
-
-                            <div class="mb-4">
-
-                                <label class="form-label">
-                                    Mở bài
-                                </label>
-
-                                <textarea class="form-control"
-                                    rows="4"></textarea>
-
-                            </div>
-
-                            <div class="mb-4">
-
-                                <label class="form-label">
-                                    Thân bài
-                                </label>
-
-                                <textarea class="form-control"
-                                    rows="8"></textarea>
-
-                            </div>
-
-                            <div class="mb-4">
-
-                                <label class="form-label">
-                                    Kết bài
-                                </label>
-
-                                <textarea class="form-control"
-                                    rows="4"></textarea>
-
-                            </div>
-
-                        </div>
-
-                        <!-- RIGHT -->
-
-                        <div class="col-lg-4">
-
-                            <div class="mb-4">
-
-                                <label class="form-label">
-                                    Thể loại
-                                </label>
-
-                                <select class="form-select">
-
-                                    <option>
-                                        AI
-                                    </option>
-
-                                    <option>
-                                        Smartphone
-                                    </option>
-
-                                    <option>
-                                        Laptop
-                                    </option>
-
-                                    <option>
-                                        Gaming
-                                    </option>
-
-                                    <option>
-                                        Công nghệ mới
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-                            <div class="mb-4">
-
-                                <label class="form-label">
-                                    Ảnh cover
-                                </label>
-
-                                <input type="text"
-                                    class="form-control">
-
-                            </div>
-
-                            <div class="mb-4">
-
-                                <label class="form-label">
-                                    Gallery ảnh
-                                </label>
-
-                                <textarea class="form-control"
-                                    rows="8"></textarea>
-
-                            </div>
-
-                        </div>
-
-                    </div>
+                    <div id="modalArticleContent"></div>
 
                 </div>
 
                 <div class="modal-footer">
 
-                    <button class="btn btn-light"
+                    <button type="button"
+                        class="btn btn-secondary"
                         data-bs-dismiss="modal">
-
-                        Hủy
-
-                    </button>
-
-                    <button class="btn btn-primary">
-
-                        Đăng bài
-
+                        Đóng
                     </button>
 
                 </div>
 
             </div>
-
         </div>
-
     </div>
+
     <?php include "footer.php"; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script src="public/js/news.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const newsItems = document.querySelectorAll(".news-open");
+
+            const modalTitle =
+                document.getElementById("modalTitle");
+
+            const modalContent =
+                document.getElementById("modalArticleContent");
+
+            const modalAuthor =
+                document.getElementById("modalAuthor");
+
+            newsItems.forEach(item => {
+
+                item.addEventListener("click", function() {
+
+                    modalTitle.textContent =
+                        this.dataset.title;
+
+                    modalAuthor.textContent =
+                        "Tác giả: " + this.dataset.author;
+
+                    modalContent.innerHTML = `
+                        <div class="article-content">
+                            ${this.dataset.content}
+                        </div>
+                    `;
+
+                    const modal = new bootstrap.Modal(
+                        document.getElementById("newsModal")
+                    );
+
+                    modal.show();
+
+                });
+
+            });
+
+        });
+
+        function insertUploadedImage(input) {
+
+            const file = input.files[0];
+
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+
+                const textarea =
+                    document.getElementById("contentBox");
+
+                const imgTag = `
+<img src="${e.target.result}">
+`;
+
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+
+                textarea.value =
+                    textarea.value.substring(0, start) +
+                    imgTag +
+                    textarea.value.substring(end);
+
+                textarea.focus();
+            };
+
+            reader.readAsDataURL(file);
+        }
+    </script>
 
 </body>
 

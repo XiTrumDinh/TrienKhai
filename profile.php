@@ -8,7 +8,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="/TrienKhai/TrienKhai/public/css/profile.css">
+    <link rel="stylesheet" href="public/css/profile.css">
 </head>
 
 <body>

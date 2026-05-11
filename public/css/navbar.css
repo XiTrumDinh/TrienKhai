@@ -1,113 +1,186 @@
-    .search-box {
-        position: relative;
-        max-width: 600px;
-    }
+/* ================= SEARCH ================= */
 
-    .search-box input {
-        width: 100%;
-        border-radius: 5px;
-    }
-
-    .search-icon {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-
-    }
-
-    .navbar-content {
-        display: flex;
-        align-items: center;
-        gap: 30px;
-    }
-
-    .feature-bar {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        position: relative;
-    }
-
-
-
-    .feature-bar svg {
-        width: 18px;
-        height: 18px;
-        fill: #333;
-        display: block;
-    }
-
-    .feature-bar {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .feature-bar p {
-        margin: 0;
-    }
-
-    .dropdown-menu {
-        border: none !important;
-        border-radius: 8px !important;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        /* Đổ bóng giống hình 2 */
-        margin-top: 5px !important;
-        /* Khoảng cách nhỏ với nút bấm */
-        min-width: 220px;
-        padding: 8px 0;
-    }
-
-    .dropdown-item {
-        padding: 10px 20px;
-        font-size: 14px;
-        color: #333;
-        border-bottom: 1px solid #f8f9fa;
-        /* Đường kẻ mờ giữa các mục */
-    }
-
-    .dropdown-item:hover {
-        background-color: #f1f1f1;
-        color: #dc3545;
-        /* Đổi màu chữ khi hover cho nổi bật */
-    }
-
-    /* Quan trọng: Sửa lỗi Media Query */
-    @media (max-width: 768px) {
-
-        /* Cho phép nội dung hiện ra thay vì display: none */
-        .navbar-content {
-            display: flex !important;
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        /* Đảm bảo menu luôn nằm trên cùng (z-index) */
-        .dropdown-menu {
-            z-index: 9999 !important;
-            position: absolute !important;
-            /* Không cho nó tràn toàn màn hình */
-        }
-    }
-    .navbar img {
-    object-fit: cover;
+.search-box {
+    position: relative;
+    max-width: 600px;
 }
 
-.dropdown-toggle::after {
-    margin-left: 5px;
+.search-box input {
+    width: 100%;
+    border-radius: 5px;
 }
+
+/* nếu bạn dùng icon search overlay */
+.search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* ================= NAVBAR LAYOUT ================= */
+
+.navbar-content {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.feature-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.feature-bar svg {
+    width: 18px;
+    height: 18px;
+    fill: #333;
+    display: block;
+}
+
+.feature-bar p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* ================= DROPDOWN ================= */
 
 .dropdown-menu {
+    border: none;
     border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    margin-top: 6px;
+    min-width: 220px;
     padding: 8px 0;
+    z-index: 2000;
 }
 
 .dropdown-item {
+    padding: 10px 16px;
     font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #f8f9fa;
+    transition: 0.2s;
 }
 
 .dropdown-item:hover {
     background: #f5f5f5;
+    color: #dc3545;
+}
+
+.dropdown-toggle::after {
+    margin-left: 6px;
+}
+
+/* ================= NAVBAR IMAGE ================= */
+
+.navbar img {
+    object-fit: cover;
+}
+.navbar-toggler {
+    border: 2px solid #5c1a1a !important; /* Màu border đậm của cậu */
+    border-radius: 12px !important;
+    padding: 8px 10px !important;
+    background-color: #fff !important;
+    /* Đảm bảo border không bị tính vào kích thước bị che */
+    box-sizing: border-box; 
+    /* Tạo khoảng cách nhỏ để không bị dính mép che */
+    margin: 5px; 
+    overflow: visible !important; 
+}
+/* ================= MOBILE RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+
+    /* Ẩn header feature bar */
+    header {
+        display: none !important;
+    }
+
+    .dropdown {
+        margin-top: 5px;
+    }
+
+    /* navbar dàn lại dạng column */
+    .navbar-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    /* collapse menu mobile */
+    .navbar-collapse {
+        background: #dc3545;
+        
+        border-radius: 10px;
+    }
+
+    /* full width các block */
+    .dropdown,
+    form,
+    .d-flex {
+        width: 100%;
+    }
+
+    .input-group {
+        width: 100%;
+    }
+
+    /* button full width cho dễ bấm */
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* dropdown menu mobile gọn hơn */
+    .dropdown-menu {
+        position: static !important;
+        float: none;
+        width: 100%;
+    }
+
+    /* hamburger button */
+    .navbar-toggler {
+        border: none;
+        padding: 6px 10px;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    /* Ép form search luôn là một hàng ngang, không cho phép rớt dòng */
+    .input-group {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        /* Quan trọng: Không cho xuống dòng */
+        width: 100% !important;
+
+    }
+
+    .input-group .form-control {
+        flex: 1;
+        /* Để ô input chiếm toàn bộ không gian còn lại */
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    /* Fix lỗi cái nút bị giãn 100% */
+    .input-group .btn {
+        width: auto !important;
+        /* Ép nút chỉ to vừa đủ chứa icon */
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 15px;
+        background-color: #fff;
+        /* Nên để màu trắng cho tiệp với ô input */
+        border: 1px solid #ced4da;
+        border-left: none;
+        /* Bỏ viền trái để cảm giác dính liền vào input */
+    }
 }

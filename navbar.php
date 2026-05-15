@@ -156,7 +156,15 @@ $keyword = $_GET["keyword"] ?? "";
                         </div>
 
                     <?php else: ?>
-                        <a href="login.php" class="btn btn-light">Đăng nhập</a>
+                        <div class="d-flex gap-2">
+                            <a href="login.php" class="btn btn-light">
+                                Đăng nhập
+                            </a>
+
+                            <a href="register.php" class="btn btn-light">
+                                Đăng ký
+                            </a>
+                        </div>
                     <?php endif; ?>
 
                 </div>

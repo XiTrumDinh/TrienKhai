@@ -11,24 +11,40 @@ require_once "Database/Database.php";
 $db = new Database();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $username = $_POST["username"];
-    $password = $_POST["password"];
 
-    $sql = "SELECT * FROM users WHERE username = ? AND password = ?";
-    $user = $db->select($sql, "ss", [$username, $password]);
+    $username = trim($_POST["username"]);
+    $password = trim($_POST["password"]);
 
+    // tìm user theo username
+    $sql = "SELECT * FROM users WHERE username = ?";
+
+    $user = $db->select($sql, "s", [$username]);
+
+    // kiểm tra tồn tại
     if (!empty($user)) {
-        $_SESSION["user"] = $user[0]["username"];
-        $_SESSION["fullname"] = $user[0]["fullname"];
-        $_SESSION["role"] = $user[0]["role"];
-        $_SESSION["id"] = $user[0]["id"];
-        header("Location: index.php");
-        exit();
+
+        $userData = $user[0];
+
+        // kiểm tra password
+        if (password_verify($password, $userData["password"])) {
+
+            $_SESSION["user"] = $userData["username"];
+            $_SESSION["role"] = $userData["role"];
+            $_SESSION["id"] = $userData["id"];
+
+            header("Location: index.php");
+            exit();
+        } else {
+
+            $_SESSION["error"] = "Sai mật khẩu!";
+        }
     } else {
-        $_SESSION["error"] = "Sai tài khoản hoặc mật khẩu!";
-        header("Location: login.php");
-        exit();
+
+        $_SESSION["error"] = "Tài khoản không tồn tại!";
     }
+
+    header("Location: login.php");
+    exit();
 }
 ?>
 <!DOCTYPE html>

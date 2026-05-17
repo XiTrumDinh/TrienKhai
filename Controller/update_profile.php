@@ -8,46 +8,31 @@ $db = new Database();
 /* =========================
    CHECK LOGIN
 ========================= */
-
 if (!isset($_SESSION["user"])) {
-
     header("Location: ../login.php");
     exit;
 }
 $userId = $_SESSION["id"];
 
 /* =========================
-   GET USER
+   GET USER CURRENT DATA
 ========================= */
-
 $stmt = $db->conn->prepare("
     SELECT * FROM users
     WHERE id = ?
 ");
-
 $stmt->bind_param("i", $userId);
-
 $stmt->execute();
-
 $result = $stmt->get_result();
-
 $user = $result->fetch_assoc();
 
-/* =========================
-   USER NOT FOUND
-========================= */
-
 if (!$user) {
-
     die("Không tìm thấy người dùng");
 }
-
-$userId = $user["id"];
 
 /* =========================
    GET FORM DATA
 ========================= */
-
 $fullname = $_POST["fullname"] ?? "";
 $email = $_POST["email"] ?? "";
 $phone = $_POST["phone"] ?? "";
@@ -58,72 +43,88 @@ $interests = $_POST["interests"] ?? "";
 /* =========================
    CREATE FOLDERS
 ========================= */
-
-$avatarFolder = __DIR__ . "/../public/uploads/avatar/";
-$coverFolder = __DIR__ . "/../public/uploads/cover/";
+$avatarFolder = __DIR__ . "/../public/img/avatar/";
+$coverFolder = __DIR__ . "/../public/img/cover/";
 
 if (!file_exists($avatarFolder)) {
-
     mkdir($avatarFolder, 0777, true);
 }
 
 if (!file_exists($coverFolder)) {
-
     mkdir($coverFolder, 0777, true);
 }
 
-/* =========================
-   AVATAR
-========================= */
+// Mảng định dạng ảnh hợp lệ được phép tải lên
+$allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
 
+/* =========================
+   PROCESS AVATAR UPLOAD
+========================= */
 $avatarPath = $user["avatar"];
 
 if (
     isset($_FILES["avatar"]) &&
+    $_FILES["avatar"]["error"] === UPLOAD_ERR_OK &&
     !empty($_FILES["avatar"]["name"])
 ) {
+    $avatarExt = strtolower(pathinfo($_FILES["avatar"]["name"], PATHINFO_EXTENSION));
 
-    $avatarName = time() . "_" . basename($_FILES["avatar"]["name"]);
+    // Kiểm tra định dạng ảnh
+    if (in_array($avatarExt, $allowedExtensions)) {
+        // Đổi tên file thành chuỗi ngẫu nhiên + thời gian để tránh trùng và lỗi ký tự tiếng Việt
+        $avatarName = time() . "_" . md5(uniqid()) . "." . $avatarExt;
+        $avatarTmp = $_FILES["avatar"]["tmp_name"];
 
-    $avatarTmp = $_FILES["avatar"]["tmp_name"];
+        $avatarUploadPath = $avatarFolder . $avatarName;
+        $newAvatarPath = "public/img/avatar/" . $avatarName;
 
-    // Path thật để upload
-    $avatarUploadPath = $avatarFolder . $avatarName;
-
-    // Path lưu DB
-    $avatarPath = "public/uploads/avatar/" . $avatarName;
-
-    move_uploaded_file($avatarTmp, $avatarUploadPath);
+        if (move_uploaded_file($avatarTmp, $avatarUploadPath)) {
+            // XÓA ẢNH CŨ TRÊN Ổ CỨNG (Nếu có ảnh cũ và ảnh đó không phải ảnh mặc định hệ thống)
+            if (!empty($user["avatar"]) && file_exists(__DIR__ . "/../" . $user["avatar"])) {
+                // Đảm bảo không xóa nhầm file avatar.jpg mặc định gốc nếu cậu để chung thư mục
+                if (basename($user["avatar"]) !== 'avatar.jpg') {
+                    unlink(__DIR__ . "/../" . $user["avatar"]);
+                }
+            }
+            $avatarPath = $newAvatarPath;
+        }
+    }
 }
 
 /* =========================
-   COVER
+   PROCESS COVER UPLOAD
 ========================= */
-
 $coverPath = $user["cover"];
 
 if (
     isset($_FILES["cover"]) &&
+    $_FILES["cover"]["error"] === UPLOAD_ERR_OK &&
     !empty($_FILES["cover"]["name"])
 ) {
+    $coverExt = strtolower(pathinfo($_FILES["cover"]["name"], PATHINFO_EXTENSION));
 
-    $coverName = time() . "_" . basename($_FILES["cover"]["name"]);
+    // Kiểm tra định dạng ảnh
+    if (in_array($coverExt, $allowedExtensions)) {
+        // Đổi tên file an toàn
+        $coverName = time() . "_" . md5(uniqid()) . "." . $coverExt;
+        $coverTmp = $_FILES["cover"]["tmp_name"];
 
-    $coverTmp = $_FILES["cover"]["tmp_name"];
+        $coverUploadPath = $coverFolder . $coverName;
+        $newCoverPath = "public/img/cover/" . $coverName;
 
-    // Path thật để upload
-    $coverUploadPath = $coverFolder . $coverName;
-
-    // Path lưu DB
-    $coverPath = "public/uploads/cover/" . $coverName;
-
-    move_uploaded_file($coverTmp, $coverUploadPath);
+        if (move_uploaded_file($coverTmp, $coverUploadPath)) {
+            // XÓA ẢNH BÌA CŨ TRÊN Ổ CỨNG
+            if (!empty($user["cover"]) && file_exists(__DIR__ . "/../" . $user["cover"])) {
+                unlink(__DIR__ . "/../" . $user["cover"]);
+            }
+            $coverPath = $newCoverPath;
+        }
+    }
 }
 
 /* =========================
-   UPDATE USER
+   UPDATE DATABASE
 ========================= */
-
 $updateStmt = $db->conn->prepare("
     UPDATE users
     SET
@@ -154,9 +155,8 @@ $updateStmt->bind_param(
 $updateStmt->execute();
 
 /* =========================
-   REDIRECT
+   REDIRECT TO PROFILE PAGE
 ========================= */
-
 header("Location: ../profile.php");
 exit;
 ?>

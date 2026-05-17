@@ -90,8 +90,7 @@ $interests = !empty($user["interests"])
             <!-- COVER -->
             <div class="profile-cover">
 
-                <img src="<?= $cover ?>"
-                    class="cover-image">
+                <img src="<?= $cover ?>" class="cover-image">
 
                 <button class="change-cover-btn">
                     📷
@@ -105,8 +104,7 @@ $interests = !empty($user["interests"])
                 <!-- LEFT -->
                 <div class="profile-left">
 
-                    <img src="<?= $avatar ?>"
-                        class="profile-avatar">
+                    <img src="<?= $avatar ?>" class="profile-avatar">
 
                     <div class="profile-user-info">
 
@@ -161,9 +159,7 @@ $interests = !empty($user["interests"])
                 <!-- RIGHT -->
                 <div class="profile-actions">
 
-                    <button class="edit-profile-btn"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editProfileModal">
+                    <button class="edit-profile-btn" data-bs-toggle="modal" data-bs-target="#editProfileModal">
 
                         ✏️ Chỉnh sửa hồ sơ
 
@@ -315,17 +311,13 @@ $interests = !empty($user["interests"])
 
     <!-- MODAL -->
     <!-- MODAL -->
-    <div class="modal fade"
-        id="editProfileModal"
-        tabindex="-1">
+    <div class="modal fade" id="editProfileModal" tabindex="-1">
 
         <div class="modal-dialog modal-dialog-centered modal-lg">
 
             <div class="modal-content">
 
-                <form action="Controller/update_profile.php"
-                    method="POST"
-                    enctype="multipart/form-data">
+                <form action="Controller/update_profile.php" method="POST" enctype="multipart/form-data">
 
                     <div class="modal-header">
 
@@ -333,9 +325,7 @@ $interests = !empty($user["interests"])
                             ✏️ Chỉnh sửa hồ sơ
                         </h3>
 
-                        <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
                         </button>
 
                     </div>
@@ -346,8 +336,7 @@ $interests = !empty($user["interests"])
 
                         <div class="text-center mb-4">
 
-                            <img src="<?= $avatar ?>"
-                                class="edit-avatar-preview mb-3">
+                            <img src="<?= $avatar ?>" class="edit-avatar-preview mb-3">
 
                         </div>
 
@@ -359,10 +348,7 @@ $interests = !empty($user["interests"])
                                 Họ tên
                             </label>
 
-                            <input type="text"
-                                name="fullname"
-                                class="form-control"
-                                value="<?= $user["fullname"] ?>">
+                            <input type="text" name="fullname" class="form-control" value="<?= $user["fullname"] ?>">
 
                         </div>
 
@@ -374,10 +360,7 @@ $interests = !empty($user["interests"])
                                 Email
                             </label>
 
-                            <input type="email"
-                                name="email"
-                                class="form-control"
-                                value="<?= $user["email"] ?>">
+                            <input type="email" name="email" class="form-control" value="<?= $user["email"] ?>">
 
                         </div>
 
@@ -389,10 +372,7 @@ $interests = !empty($user["interests"])
                                 Số điện thoại
                             </label>
 
-                            <input type="text"
-                                name="phone"
-                                class="form-control"
-                                value="<?= $user["phone"] ?>">
+                            <input type="text" name="phone" class="form-control" value="<?= $user["phone"] ?>">
 
                         </div>
 
@@ -404,10 +384,7 @@ $interests = !empty($user["interests"])
                                 Địa chỉ
                             </label>
 
-                            <input type="text"
-                                name="address"
-                                class="form-control"
-                                value="<?= $user["address"] ?>">
+                            <input type="text" name="address" class="form-control" value="<?= $user["address"] ?>">
 
                         </div>
 
@@ -419,10 +396,7 @@ $interests = !empty($user["interests"])
                                 Giới thiệu
                             </label>
 
-                            <textarea
-                                name="bio"
-                                class="form-control"
-                                rows="4"><?= $user["bio"] ?></textarea>
+                            <textarea name="bio" class="form-control" rows="4"><?= $user["bio"] ?></textarea>
 
                         </div>
 
@@ -434,10 +408,7 @@ $interests = !empty($user["interests"])
                                 Sở thích
                             </label>
 
-                            <input type="text"
-                                name="interests"
-                                class="form-control"
-                                value="<?= $user["interests"] ?>"
+                            <input type="text" name="interests" class="form-control" value="<?= $user["interests"] ?>"
                                 placeholder="VD: AI,Gaming,Laptop">
 
                         </div>
@@ -445,45 +416,82 @@ $interests = !empty($user["interests"])
                         <!-- AVATAR -->
 
                         <div class="mb-3">
-
-                            <label class="form-label">
-                                Ảnh đại diện
-                            </label>
-
-                            <input type="file"
-                                name="avatar"
-                                class="form-control">
-
+                            <label class="form-label" id="avatarLabel">Ảnh đại diện</label>
+                            <input type="file" name="avatar" class="form-control" accept="image/*"
+                                onchange="compressProfileImage(this, 'avatar')">
                         </div>
-
-                        <!-- COVER -->
 
                         <div class="mb-3">
-
-                            <label class="form-label">
-                                Ảnh nền
-                            </label>
-
-                            <input type="file"
-                                name="cover"
-                                class="form-control">
-
+                            <label class="form-label" id="coverLabel">Ảnh nền</label>
+                            <input type="file" name="cover" class="form-control" accept="image/*"
+                                onchange="compressProfileImage(this, 'cover')">
                         </div>
+
+                        <script>
+                            function compressProfileImage(input, type) {
+                                const file = input.files[0];
+                                if (!file) return;
+
+                                const labelElement = document.getElementById(type + 'Label');
+
+                                // Nếu ảnh lớn hơn 1.5MB thì tiến hành nén ngầm trước khi submit form
+                                if (file.type.startsWith('image/') && file.size > 1.5 * 1024 * 1024) {
+                                    if (labelElement) labelElement.innerText = (type === 'avatar' ? 'Ảnh đại diện' : 'Ảnh nền') + " (Đang tối ưu dung lượng...)";
+
+                                    const reader = new FileReader();
+                                    reader.readAsDataURL(file);
+                                    reader.onload = function (event) {
+                                        const img = new Image();
+                                        img.src = event.target.result;
+                                        img.onload = function () {
+                                            const canvas = document.createElement('canvas');
+                                            let width = img.width;
+                                            let height = img.height;
+
+                                            // Giới hạn chiều rộng tối đa (Avatar: 800px, Cover: 1920px FullHD)
+                                            const max_size = (type === 'avatar') ? 800 : 1920;
+                                            if (width > height) {
+                                                if (width > max_size) { height *= max_size / width; width = max_size; }
+                                            } else {
+                                                if (height > max_size) { width *= max_size / height; height = max_size; }
+                                            }
+
+                                            canvas.width = width;
+                                            canvas.height = height;
+                                            const ctx = canvas.getContext('2d');
+                                            ctx.drawImage(img, 0, 0, width, height);
+
+                                            // Nén chất lượng xuống 75% dạng JPEG để giảm dung lượng tối đa
+                                            canvas.toBlob(function (blob) {
+                                                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                                                    type: 'image/jpeg',
+                                                    lastModified: Date.now()
+                                                });
+
+                                                // Thay thế file nặng bằng file đã nén siêu nhẹ vào input file
+                                                const dataTransfer = new DataTransfer();
+                                                dataTransfer.items.add(compressedFile);
+                                                input.files = dataTransfer.files;
+
+                                                if (labelElement) labelElement.innerText = (type === 'avatar' ? 'Ảnh đại diện' : 'Ảnh nền') + " (Đã tối ưu thành công!)";
+                                            }, 'image/jpeg', 0.75);
+                                        };
+                                    };
+                                }
+                            }
+                        </script>
 
                     </div>
 
                     <div class="modal-footer">
 
-                        <button class="btn btn-secondary"
-                            type="button"
-                            data-bs-dismiss="modal">
+                        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">
 
                             Hủy
 
                         </button>
 
-                        <button class="btn btn-primary"
-                            type="submit">
+                        <button class="btn btn-primary" type="submit">
 
                             💾 Lưu thay đổi
 
@@ -502,7 +510,10 @@ $interests = !empty($user["interests"])
     <?php include "footer.php"; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Thêm thuộc tính onchange vào thẻ input của cậu -->
+    <input type="file" name="avatar" class="form-control" accept="image/*" onchange="compressImage(this)">
 
+  
 </body>
 
 </html>

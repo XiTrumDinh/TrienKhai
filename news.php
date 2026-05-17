@@ -34,7 +34,8 @@ function safeImg($img)
     <link rel="stylesheet" href="public/css/news.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="public/css/style.css">
 </head>
 
@@ -49,8 +50,7 @@ function safeImg($img)
             <div class="hero-grid">
 
                 <?php if ($hero): ?>
-                    <div class="hero-main news-open"
-                        data-title="<?= htmlspecialchars($hero['title'], ENT_QUOTES) ?>"
+                    <div class="hero-main news-open" data-title="<?= htmlspecialchars($hero['title'], ENT_QUOTES) ?>"
                         data-content="<?= htmlspecialchars($hero['content'] ?? '', ENT_QUOTES) ?>"
                         data-author="<?= htmlspecialchars($hero['fullname'], ENT_QUOTES) ?>">
 
@@ -79,8 +79,7 @@ function safeImg($img)
 
                 <div class="hero-side">
                     <?php foreach ($sideNews as $news): ?>
-                        <div class="side-news news-open"
-                            data-title="<?= htmlspecialchars($news['title'], ENT_QUOTES) ?>"
+                        <div class="side-news news-open" data-title="<?= htmlspecialchars($news['title'], ENT_QUOTES) ?>"
                             data-content="<?= htmlspecialchars($news['content'] ?? '', ENT_QUOTES) ?>"
                             data-author="<?= htmlspecialchars($news['fullname'], ENT_QUOTES) ?>">
 
@@ -114,8 +113,7 @@ function safeImg($img)
             <div class="news-grid">
 
                 <?php foreach ($cards as $news): ?>
-                    <div class="news-card news-open"
-                        data-title="<?= htmlspecialchars($news['title'], ENT_QUOTES) ?>"
+                    <div class="news-card news-open" data-title="<?= htmlspecialchars($news['title'], ENT_QUOTES) ?>"
                         data-content="<?= htmlspecialchars($news['content'] ?? '', ENT_QUOTES) ?>"
                         data-author="<?= htmlspecialchars($news['fullname'], ENT_QUOTES) ?>">
 
@@ -149,16 +147,12 @@ function safeImg($img)
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
 
-                <form action="Controller/save_news.php"
-                    method="POST"
-                    enctype="multipart/form-data">
+                <form action="Controller/save_news.php" method="POST" enctype="multipart/form-data">
 
                     <div class="modal-header">
                         <h3 class="modal-title">Thêm bài viết</h3>
 
-                        <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
                     <div class="modal-body">
@@ -171,42 +165,29 @@ function safeImg($img)
                                 <div class="mb-4">
                                     <label>Tiêu đề</label>
 
-                                    <input type="text"
-                                        name="title"
-                                        class="form-control"
-                                        required>
+                                    <input type="text" name="title" class="form-control" required>
                                 </div>
 
                                 <div class="mb-4">
                                     <label>Mở bài</label>
 
-                                    <textarea name="excerpt"
-                                        class="form-control"
-                                        rows="4"
-                                        required></textarea>
+                                    <textarea name="excerpt" class="form-control" rows="4" required></textarea>
                                 </div>
 
                                 <div class="mb-2 d-flex justify-content-between align-items-center">
                                     <label>Nội dung</label>
 
-                                    <input type="file"
-                                        id="inlineImage"
-                                        accept="image/*"
-                                        style="display:none"
+                                    <input type="file" id="inlineImage" accept="image/*" style="display:none"
                                         onchange="insertUploadedImage(this)">
 
-                                    <button type="button"
-                                        class="btn btn-sm btn-outline-primary"
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
                                         onclick="document.getElementById('inlineImage').click()">
                                         Chèn ảnh
                                     </button>
                                 </div>
 
                                 <div class="mb-4">
-                                    <textarea id="contentBox"
-                                        name="content"
-                                        class="form-control"
-                                        rows="12"
+                                    <textarea id="contentBox" name="content" class="form-control" rows="12"
                                         required></textarea>
                                 </div>
 
@@ -228,13 +209,12 @@ function safeImg($img)
                                 </div>
 
                                 <div class="mb-4">
-                                    <label>Ảnh cover</label>
-
-                                    <input type="file"
-                                        name="cover_file"
-                                        class="form-control"
-                                        accept="image/*"
-                                        required>
+                                    <div class="mb-4">
+                                        <label>Ảnh cover</label>
+                                        <input type="file" name="cover_file" id="coverFileInput" class="form-control"
+                                            accept="image/*" required onchange="compressCoverImage(this)">
+                                        <!-- THÊM DÒNG NÀY -->
+                                    </div>
                                 </div>
 
                             </div>
@@ -245,14 +225,11 @@ function safeImg($img)
 
                     <div class="modal-footer">
 
-                        <button type="button"
-                            class="btn btn-light"
-                            data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">
                             Hủy
                         </button>
 
-                        <button type="submit"
-                            class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary">
                             Đăng bài
                         </button>
 
@@ -265,9 +242,7 @@ function safeImg($img)
     </div>
 
     <!-- FLOAT BUTTON -->
-    <button class="add-news-btn"
-        data-bs-toggle="modal"
-        data-bs-target="#addNewsModal">
+    <button class="add-news-btn" data-bs-toggle="modal" data-bs-target="#addNewsModal">
         +
     </button>
 
@@ -279,9 +254,7 @@ function safeImg($img)
                 <div class="modal-header">
                     <h3 class="modal-title" id="modalTitle"></h3>
 
-                    <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
@@ -298,9 +271,7 @@ function safeImg($img)
 
                 <div class="modal-footer">
 
-                    <button type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Đóng
                     </button>
 
@@ -315,78 +286,213 @@ function safeImg($img)
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-
+        document.addEventListener("DOMContentLoaded", function () {
             const newsItems = document.querySelectorAll(".news-open");
-
-            const modalTitle =
-                document.getElementById("modalTitle");
-
-            const modalContent =
-                document.getElementById("modalArticleContent");
-
-            const modalAuthor =
-                document.getElementById("modalAuthor");
+            const modalTitle = document.getElementById("modalTitle");
+            const modalContent = document.getElementById("modalArticleContent");
+            const modalAuthor = document.getElementById("modalAuthor");
 
             newsItems.forEach(item => {
-
-                item.addEventListener("click", function() {
-
-                    modalTitle.textContent =
-                        this.dataset.title;
-
-                    modalAuthor.textContent =
-                        "Tác giả: " + this.dataset.author;
+                item.addEventListener("click", function () {
+                    modalTitle.textContent = this.dataset.title;
+                    modalAuthor.textContent = "Tác giả: " + this.dataset.author;
 
                     modalContent.innerHTML = `
-                        <div class="article-content">
-                            ${this.dataset.content}
-                        </div>
-                    `;
+                    <div class="article-content">
+                        ${this.dataset.content}
+                    </div>
+                `;
 
                     const modal = new bootstrap.Modal(
                         document.getElementById("newsModal")
                     );
-
                     modal.show();
-
                 });
-
             });
-
         });
 
+        // CODE ĐÃ ĐƯỢC SỬA: Upload ảnh lên host qua AJAX thay vì dùng FileReader cũ làm sập DB
         function insertUploadedImage(input) {
-
             const file = input.files[0];
-
             if (!file) return;
 
-            const reader = new FileReader();
+            // Tạo Form dữ liệu ảo để gửi file qua AJAX
+            const formData = new FormData();
+            formData.append('image', file);
 
-            reader.onload = function(e) {
+            // Âm thầm gửi file lên file xử lý upload trên hosting (upload_ajax.php)
+            // Lưu ý: Đảm bảo đường dẫn này đúng với vị trí file upload_ajax.php của cậu
+            fetch('Controller/upload_ajax.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Tạo thẻ img với link ảnh THẬT từ server trả về (Đã thêm class Bootstrap cho đẹp)
+                        const imgTag = `\n<img src="${data.url}" class="img-fluid my-3" alt="article image">\n`;
 
-                const textarea =
-                    document.getElementById("contentBox");
+                        const textarea = document.getElementById("contentBox");
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
 
-                const imgTag = `
-<img src="${e.target.result}">
-`;
+                        // Chèn thẻ <img> vào đúng vị trí con trỏ chuột trong ô viết bài
+                        textarea.value =
+                            textarea.value.substring(0, start) +
+                            imgTag +
+                            textarea.value.substring(end);
 
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
+                        textarea.focus();
 
-                textarea.value =
-                    textarea.value.substring(0, start) +
-                    imgTag +
-                    textarea.value.substring(end);
+                        // Đặt con trỏ chuột nằm ngay sau thẻ ảnh vừa chèn
+                        textarea.selectionStart = start + imgTag.length;
+                        textarea.selectionEnd = start + imgTag.length;
 
-                textarea.focus();
-            };
+                        // Reset ô chọn file để có thể chọn lại cùng 1 ảnh nếu muốn
+                        input.value = '';
+                    } else {
+                        // Hiện thông báo nếu file php báo lỗi (ví dụ: file quá nặng, sai định dạng...)
+                        alert("Lỗi upload: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Có lỗi xảy ra trong quá trình kết nối tới máy chủ để tải ảnh.");
+                });
+        }
+        function insertUploadedImage(input) {
+            const file = input.files[0];
+            if (!file) return;
 
-            reader.readAsDataURL(file);
+            // Nếu file là ảnh và nặng hơn 1.5MB, tiến hành nén tự động bằng Javascript
+            if (file.type.startsWith('image/') && file.size > 1.5 * 1024 * 1024) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function (event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function () {
+                        // Tạo canvas để vẽ lại ảnh với kích thước/chất lượng thấp hơn
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        // Nếu ảnh quá to (ví dụ hơn 1600px), tự động scale nhỏ lại cho nhẹ
+                        const max_size = 1600;
+                        if (width > height) {
+                            if (width > max_size) { height *= max_size / width; width = max_size; }
+                        } else {
+                            if (height > max_size) { width *= max_size / height; height = max_size; }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Nén ảnh về định dạng jpeg với chất lượng 70% (0.7) -> Ảnh sẽ cực nhẹ
+                        canvas.toBlob(function (blob) {
+                            const compressedFile = new File([blob], file.name, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            // Gửi file đã nén lên server
+                            ajaxUploadImage(compressedFile, input);
+                        }, 'image/jpeg', 0.7);
+                    };
+                };
+            } else {
+                // Nếu ảnh nhỏ sẵn dưới 1.5MB thì gửi thẳng không cần nén
+                ajaxUploadImage(file, input);
+            }
+        }
+
+        // Hàm phụ trách gửi AJAX tách riêng ra cho code sạch sẽ
+        function ajaxUploadImage(file, input) {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            fetch('Controller/upload_ajax.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const imgTag = `\n<img src="${data.url}" class="img-fluid my-3" alt="article image">\n`;
+                        const textarea = document.getElementById("contentBox");
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+
+                        textarea.value = textarea.value.substring(0, start) + imgTag + textarea.value.substring(end);
+                        textarea.focus();
+                        textarea.selectionStart = start + imgTag.length;
+                        textarea.selectionEnd = start + imgTag.length;
+                        input.value = '';
+                    } else {
+                        alert("Lỗi upload: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Có lỗi xảy ra trong quá trình kết nối tới máy chủ.");
+                });
+        }
+        function compressCoverImage(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // Chỉ nén nếu file là ảnh và dung lượng lớn hơn 1.5MB (để tiết kiệm tài nguyên)
+            if (file.type.startsWith('image/') && file.size > 1.5 * 1024 * 1024) {
+
+                // Tạo hiệu ứng thông báo trực quan cho người dùng biết hệ thống đang xử lý
+                const originalLabel = input.previousElementSibling;
+                if (originalLabel) originalLabel.innerText = "Ảnh cover (Đang tối ưu dung lượng ảnh...)";
+
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function (event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function () {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        // Giới hạn chiều rộng ảnh cover tối đa 1920px (chuẩn hiển thị website)
+                        const max_size = 1920;
+                        if (width > height) {
+                            if (width > max_size) { height *= max_size / width; width = max_size; }
+                        } else {
+                            if (height > max_size) { width *= max_size / height; height = max_size; }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Nén ảnh về chất lượng 75%
+                        canvas.toBlob(function (blob) {
+                            const compressedFile = new File([blob], file.name, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+
+                            // TIẾN HÀNH NHÉT NGƯỢC FILE ĐÃ NÉN VÀO Ô INPUT FILE
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(compressedFile);
+                            input.files = dataTransfer.files;
+
+                            // Khôi phục lại chữ hiển thị ban đầu
+                            if (originalLabel) originalLabel.innerText = "Ảnh cover (Đã tối ưu thành công!)";
+                        }, 'image/jpeg', 0.75);
+                    };
+                };
+            }
         }
     </script>
+
 
 </body>
 

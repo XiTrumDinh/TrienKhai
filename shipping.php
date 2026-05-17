@@ -43,16 +43,7 @@ if (!empty($orders)) {
     }
 }
 
-// ===== HỦY ĐƠN =====
-if (isset($_POST['cancel_order'])) {
-    $order_id = $_POST['order_id'];
 
-    $sql_delete = "DELETE FROM orders WHERE id = ? AND user_id = ?";
-    $db->execute($sql_delete, "ii", [$order_id, $user_id]);
-
-    header("Location: shipping.php");
-    exit();
-}
 
 // ===== UPDATE =====
 if (isset($_POST['update_order'])) {
@@ -212,7 +203,7 @@ if (isset($_POST['update_order'])) {
                                     Liên Hệ
                                 </button>
 
-                                <form method="POST" onclick="event.stopPropagation();" onsubmit="return confirm('Hủy đơn?');">
+                                <form action="Controller/delete_ship.php" method="POST" onclick="event.stopPropagation();" onsubmit="return confirm('Hủy đơn?');">
                                     <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
                                     <button type="submit" name="cancel_order" class="btn btn-danger"
                                         onclick="event.stopPropagation();">

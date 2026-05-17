@@ -1,3 +1,71 @@
+<?php
+session_start();
+
+require_once "Database/Database.php";
+
+$db = new Database();
+$userId = $_SESSION["id"];
+
+$stmt = $db->conn->prepare("
+    SELECT * FROM users 
+    WHERE id = ?
+");
+
+$stmt->bind_param("i", $userId);
+
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+$user = $result->fetch_assoc();
+$userId = $user["id"];
+
+// Đếm đơn hàng
+$orderStmt = $db->conn->prepare("
+    SELECT COUNT(*) as total_orders
+    FROM orders
+    WHERE user_id = ?
+");
+
+$orderStmt->bind_param("i", $userId);
+
+$orderStmt->execute();
+
+$orderResult = $orderStmt->get_result();
+
+$totalOrders = $orderResult->fetch_assoc()["total_orders"];
+// Đếm bài viết
+$postStmt = $db->conn->prepare("
+    SELECT COUNT(*) as total_posts
+    FROM news
+    WHERE author_id = ?
+");
+
+$postStmt->bind_param("i", $userId);
+
+$postStmt->execute();
+
+$postResult = $postStmt->get_result();
+
+$totalPosts = $postResult->fetch_assoc()["total_posts"];
+// Avatar mặc định
+$avatar = !empty($user["avatar"])
+    ? $user["avatar"]
+    : "public/img/avatar/avatar.jpg";
+
+// Cover mặc định
+$cover = !empty($user["cover"])
+    ? $user["cover"]
+    : "https://images.unsplash.com/photo-1518770660439-4636190af475";
+
+$bio = !empty($user["bio"])
+    ? $user["bio"]
+    : "Chưa có giới thiệu.";
+
+$interests = !empty($user["interests"])
+    ? explode(",", $user["interests"])
+    : ["Chưa có sở thích"];
+?>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -22,7 +90,7 @@
             <!-- COVER -->
             <div class="profile-cover">
 
-                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475"
+                <img src="<?= $cover ?>"
                     class="cover-image">
 
                 <button class="change-cover-btn">
@@ -37,7 +105,7 @@
                 <!-- LEFT -->
                 <div class="profile-left">
 
-                    <img src="public/img/avatar/avatar.jpg"
+                    <img src="<?= $avatar ?>"
                         class="profile-avatar">
 
                     <div class="profile-user-info">
@@ -45,26 +113,22 @@
                         <div class="profile-name-row">
 
                             <h2>
-                                <?= $_SESSION["user"] ?>
+                                <?= $user["fullname"] ?>
                             </h2>
 
                             <div class="profile-role-badge">
 
-                                <?= strtoupper($_SESSION["role"] ?? "user") ?>
+                                <?= strtoupper($user["role"]) ?>
 
                             </div>
 
                         </div>
 
-                        <p class="profile-desc">
-                            Thành viên KPD • Yêu công nghệ • Thích gaming
-                        </p>
-
                         <div class="profile-stats">
 
                             <div class="stat-box">
 
-                                <strong>14</strong>
+                                <strong><?= $totalOrders ?></strong>
 
                                 <span>Đơn hàng</span>
 
@@ -72,7 +136,7 @@
 
                             <div class="stat-box">
 
-                                <strong>6</strong>
+                                <strong><?= $totalPosts ?></strong>
 
                                 <span>Bài viết</span>
 
@@ -80,7 +144,9 @@
 
                             <div class="stat-box">
 
-                                <strong>2025</strong>
+                                <strong>
+                                    <?= date("Y", strtotime($user["created_at"])) ?>
+                                </strong>
 
                                 <span>Tham gia</span>
 
@@ -120,8 +186,8 @@
                         </h5>
 
                         <p>
-                            Thành viên của KPD từ năm 2025.
-                            Đam mê công nghệ, gaming và phần cứng máy tính.
+
+                            <?= $bio ?>
                         </p>
 
                     </div>
@@ -134,10 +200,13 @@
 
                         <div class="interest-tags">
 
-                            <span>AI</span>
-                            <span>Gaming</span>
-                            <span>Laptop</span>
-                            <span>PC Build</span>
+                            <?php foreach ($interests as $interest): ?>
+
+                                <span>
+                                    <?= trim($interest) ?>
+                                </span>
+
+                            <?php endforeach; ?>
 
                         </div>
 
@@ -167,7 +236,19 @@
                                 </span>
 
                                 <span class="info-value">
-                                    <?= $_SESSION["user"] ?>
+                                    <?= $user["username"] ?>
+                                </span>
+
+                            </div>
+
+                            <div class="info-row">
+
+                                <span class="info-label">
+                                    🪪 Họ tên
+                                </span>
+
+                                <span class="info-value">
+                                    <?= $user["fullname"] ?>
                                 </span>
 
                             </div>
@@ -179,7 +260,7 @@
                                 </span>
 
                                 <span class="info-value">
-                                    user@gmail.com
+                                    <?= $user["email"] ?>
                                 </span>
 
                             </div>
@@ -191,7 +272,7 @@
                                 </span>
 
                                 <span class="info-value">
-                                    0123 456 789
+                                    <?= $user["phone"] ?>
                                 </span>
 
                             </div>
@@ -203,7 +284,7 @@
                                 </span>
 
                                 <span class="info-value">
-                                    TP. Hồ Chí Minh
+                                    <?= $user["address"] ?>
                                 </span>
 
                             </div>
@@ -215,7 +296,7 @@
                                 </span>
 
                                 <span class="info-value">
-                                    01/01/2025
+                                    <?= date("d/m/Y", strtotime($user["created_at"])) ?>
                                 </span>
 
                             </div>
@@ -233,124 +314,184 @@
     </div>
 
     <!-- MODAL -->
+    <!-- MODAL -->
     <div class="modal fade"
         id="editProfileModal"
         tabindex="-1">
 
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
 
             <div class="modal-content">
 
-                <div class="modal-header">
+                <form action="Controller/update_profile.php"
+                    method="POST"
+                    enctype="multipart/form-data">
 
-                    <h3 class="modal-title">
-                        ✏️ Chỉnh sửa hồ sơ
-                    </h3>
+                    <div class="modal-header">
 
-                    <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                    </button>
+                        <h3 class="modal-title">
+                            ✏️ Chỉnh sửa hồ sơ
+                        </h3>
 
-                </div>
-
-                <div class="modal-body">
-
-                    <div class="mb-4 text-center">
-
-                        <img src="public/img/avatar/avatar.jpg"
-                            class="edit-avatar-preview">
+                        <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                        </button>
 
                     </div>
 
-                    <div class="mb-3">
+                    <div class="modal-body">
 
-                        <label class="form-label">
-                            Tên tài khoản
-                        </label>
+                        <!-- AVATAR -->
 
-                        <input type="text"
-                            class="form-control"
-                            value="<?= $_SESSION["user"] ?>">
+                        <div class="text-center mb-4">
+
+                            <img src="<?= $avatar ?>"
+                                class="edit-avatar-preview mb-3">
+
+                        </div>
+
+                        <!-- FULLNAME -->
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Họ tên
+                            </label>
+
+                            <input type="text"
+                                name="fullname"
+                                class="form-control"
+                                value="<?= $user["fullname"] ?>">
+
+                        </div>
+
+                        <!-- EMAIL -->
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Email
+                            </label>
+
+                            <input type="email"
+                                name="email"
+                                class="form-control"
+                                value="<?= $user["email"] ?>">
+
+                        </div>
+
+                        <!-- PHONE -->
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Số điện thoại
+                            </label>
+
+                            <input type="text"
+                                name="phone"
+                                class="form-control"
+                                value="<?= $user["phone"] ?>">
+
+                        </div>
+
+                        <!-- ADDRESS -->
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Địa chỉ
+                            </label>
+
+                            <input type="text"
+                                name="address"
+                                class="form-control"
+                                value="<?= $user["address"] ?>">
+
+                        </div>
+
+                        <!-- BIO -->
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Giới thiệu
+                            </label>
+
+                            <textarea
+                                name="bio"
+                                class="form-control"
+                                rows="4"><?= $user["bio"] ?></textarea>
+
+                        </div>
+
+                        <!-- INTERESTS -->
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Sở thích
+                            </label>
+
+                            <input type="text"
+                                name="interests"
+                                class="form-control"
+                                value="<?= $user["interests"] ?>"
+                                placeholder="VD: AI,Gaming,Laptop">
+
+                        </div>
+
+                        <!-- AVATAR -->
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Ảnh đại diện
+                            </label>
+
+                            <input type="file"
+                                name="avatar"
+                                class="form-control">
+
+                        </div>
+
+                        <!-- COVER -->
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Ảnh nền
+                            </label>
+
+                            <input type="file"
+                                name="cover"
+                                class="form-control">
+
+                        </div>
 
                     </div>
 
-                    <div class="mb-3">
+                    <div class="modal-footer">
 
-                        <label class="form-label">
-                            Email
-                        </label>
+                        <button class="btn btn-secondary"
+                            type="button"
+                            data-bs-dismiss="modal">
 
-                        <input type="email"
-                            class="form-control"
-                            value="user@gmail.com">
+                            Hủy
 
-                    </div>
+                        </button>
 
-                    <div class="mb-3">
+                        <button class="btn btn-primary"
+                            type="submit">
 
-                        <label class="form-label">
-                            Số điện thoại
-                        </label>
+                            💾 Lưu thay đổi
 
-                        <input type="text"
-                            class="form-control"
-                            value="0123 456 789">
+                        </button>
 
                     </div>
 
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Địa chỉ
-                        </label>
-
-                        <input type="text"
-                            class="form-control"
-                            value="TP. Hồ Chí Minh">
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Ảnh đại diện
-                        </label>
-
-                        <input type="file"
-                            class="form-control">
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Ảnh nền
-                        </label>
-
-                        <input type="file"
-                            class="form-control">
-
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-
-                    <button class="btn btn-secondary"
-                        data-bs-dismiss="modal">
-
-                        Hủy
-
-                    </button>
-
-                    <button class="btn btn-primary">
-
-                        Lưu thay đổi
-
-                    </button>
-
-                </div>
+                </form>
 
             </div>
 

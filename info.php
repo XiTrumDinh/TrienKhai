@@ -10,7 +10,20 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
     exit();
 }
 $db = new Database();
+$username = $_SESSION["user"];
 
+$stmt = $db->conn->prepare("
+    SELECT * FROM users
+    WHERE username = ?
+");
+
+$stmt->bind_param("s", $username);
+
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+$user = $result->fetch_assoc();
 $total = 0;
 $totalQty = 0;
 
@@ -79,11 +92,38 @@ $final = $total - $discount;
                     <h5>Thông tin nhận hàng</h5>
 
                     <form id="orderForm" action="pay.php" method="POST">
-                        <input type="text" name="name" class="form-control" placeholder="Họ và tên" required>
-                        <input type="text" name="phone" class="form-control" placeholder="SĐT" required>
-                        <input type="email" name="email" class="form-control" placeholder="Email">
-                        <input type="text" name="address" class="form-control" placeholder="Địa chỉ" required>
-                        <textarea name="note" class="form-control" placeholder="Ghi chú"></textarea>
+
+                        <input type="text"
+                            name="name"
+                            class="form-control"
+                            placeholder="Họ và tên"
+                            value="<?= $user['fullname'] ?? '' ?>"
+                            required>
+
+                        <input type="text"
+                            name="phone"
+                            class="form-control"
+                            placeholder="SĐT"
+                            value="<?= $user['phone'] ?? '' ?>"
+                            required>
+
+                        <input type="email"
+                            name="email"
+                            class="form-control"
+                            placeholder="Email"
+                            value="<?= $user['email'] ?? '' ?>">
+
+                        <input type="text"
+                            name="address"
+                            class="form-control"
+                            placeholder="Địa chỉ"
+                            value="<?= $user['address'] ?? '' ?>"
+                            required>
+
+                        <textarea name="note"
+                            class="form-control"
+                            placeholder="Ghi chú"></textarea>
+
                     </form>
                 </div>
 
